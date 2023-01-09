@@ -58,6 +58,9 @@ public class TemplateGenerator {
 	@Autowired
 	private ObjectMapper mapper;
 
+	@Autowired
+	private Utility utility;
+
 	/**
 	 * Gets the template.
 	 *
@@ -72,15 +75,15 @@ public class TemplateGenerator {
 	 *             Signals that an I/O exception has occurred.
 	 *             the apis resource access exception
 	 */
-	public InputStream getTemplate(String templateTypeCode, Map<String, Object> attributes, String langCode)
+	public InputStream getTemplate(String cardTemplate, Map<String, Object> attributes, String langCode)
 			throws Exception {
 
-		ResponseWrapper<?> responseWrapper;
-		TemplateResponseDto template;
+		//ResponseWrapper<?> responseWrapper;
+		//TemplateResponseDto template;
 		printLogger.debug("TemplateGenerator::getTemplate()::entry");
 
 		try {
-			List<String> pathSegments = new ArrayList<>();
+		/*	List<String> pathSegments = new ArrayList<>();
 			pathSegments.add(langCode);
 			pathSegments.add(templateTypeCode);
 
@@ -88,13 +91,15 @@ public class TemplateGenerator {
 					ResponseWrapper.class);
 			template = mapper.readValue(mapper.writeValueAsString(responseWrapper.getResponse()),
 					TemplateResponseDto.class);
-
 			InputStream fileTextStream = null;
 			if (template != null) {
 				InputStream stream = new ByteArrayInputStream(
 						template.getTemplates().iterator().next().getFileText().getBytes());
 				fileTextStream = getTemplateManager().merge(stream, attributes);
-			}
+			}*/
+			InputStream fileTextStream = null;
+			InputStream stream = new ByteArrayInputStream(utility.getUinCardTemplate(cardTemplate).getBytes());
+			fileTextStream = getTemplateManager().merge(stream, attributes);
 			printLogger.debug("TemplateGenerator::getTemplate()::exit");
 			return fileTextStream;
 

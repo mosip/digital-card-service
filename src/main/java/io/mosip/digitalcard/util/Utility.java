@@ -36,6 +36,7 @@ public class Utility {
     @Value("${mosip.kernel.config.server.file.storage.uri}")
     private String configServerFileStorageURL;
 
+
     private static final String LANGUAGE = "language";
 
     @Autowired
@@ -63,6 +64,9 @@ public class Utility {
 
     private String mappingJsonString = null;
 
+    private String uinCardTemplateData = null;
+
+
     @PostConstruct
     private void loadRegProcessorIdentityJson() throws Exception {
         regProcessorIdentityJson = restClient.getForObject(configServerFileStorageURL + identityJson, String.class);
@@ -82,6 +86,10 @@ public class Utility {
         }
 
         return getJSONObject(objectMapper.readValue(regProcessorIdentityJson,JSONObject.class),IDENTITY);
+    }
+
+    public String getUinCardTemplate(String cardTemplate) throws Exception {
+        return restClient.getForObject(configServerFileStorageURL + cardTemplate, String.class);
     }
 
     @SuppressWarnings("unchecked")
