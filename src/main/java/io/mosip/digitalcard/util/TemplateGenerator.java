@@ -17,16 +17,14 @@ import org.apache.velocity.runtime.log.NullLogChute;
 import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.apache.velocity.runtime.resource.loader.FileResourceLoader;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Properties;
+import java.util.*;
 
 /**
  * The Class TemplateGenerator.
@@ -61,11 +59,17 @@ public class TemplateGenerator {
 	@Autowired
 	private Utility utility;
 
+	@Value("${mosip.digitalcard.service.template}")
+	private String templateFile;
+
+	private static String SEMICOLON = ";";
+	private static String COLON = ":";
+
+
 	/**
 	 * Gets the template.
 	 *
-	 * @param templateTypeCode
-	 *            the template type code
+	 *   the template type code
 	 * @param attributes
 	 *            the attributes
 	 * @param langCode
@@ -81,24 +85,16 @@ public class TemplateGenerator {
 		//ResponseWrapper<?> responseWrapper;
 		//TemplateResponseDto template;
 		printLogger.debug("TemplateGenerator::getTemplate()::entry");
-
+		String templateFileName=null;
 		try {
-		/*	List<String> pathSegments = new ArrayList<>();
-			pathSegments.add(langCode);
-			pathSegments.add(templateTypeCode);
-
-			responseWrapper = (ResponseWrapper<?>) restClient.getApi(ApiName.TEMPLATES, pathSegments, "", "",
-					ResponseWrapper.class);
-			template = mapper.readValue(mapper.writeValueAsString(responseWrapper.getResponse()),
-					TemplateResponseDto.class);
+			for (String key : templateFile.split(SEMICOLON)) {
+				String[] parts = key.split(COLON, 2);
+				if(parts[0].equalsIgnoreCase(cardTemplate)){
+					templateFileName=parts[1];
+				}
+			}
 			InputStream fileTextStream = null;
-			if (template != null) {
-				InputStream stream = new ByteArrayInputStream(
-						template.getTemplates().iterator().next().getFileText().getBytes());
-				fileTextStream = getTemplateManager().merge(stream, attributes);
-			}*/
-			InputStream fileTextStream = null;
-			InputStream stream = new ByteArrayInputStream(utility.getUinCardTemplate(cardTemplate).getBytes());
+			InputStream stream = new ByteArrayInputStream(Base64.getDecoder().decode( utility.getUinCardTemplate(templateFileName)));
 			fileTextStream = getTemplateManager().merge(stream, attributes);
 			printLogger.debug("TemplateGenerator::getTemplate()::exit");
 			return fileTextStream;

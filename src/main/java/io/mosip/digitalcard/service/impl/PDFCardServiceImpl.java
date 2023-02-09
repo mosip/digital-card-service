@@ -175,10 +175,6 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 				}
 				setTemplateAttributes(decryptedCredentialJson, attributes);
 				// putting additional attribute for vid card
-				if(additionalAttributes.containsKey("cardFormat") && additionalAttributes.get("cardFormat").equals("vidCard")){
-					template=vidCardTemplate;
-					attributes.putAll(additionalAttributes);
-				}
 				attributes.put(IdType.UIN.toString(), uin);
 				boolean isQRcodeSet = setQrCode(decryptedCredentialJson.toString(), attributes,isPhotoSet);
 				if (!isQRcodeSet) {
