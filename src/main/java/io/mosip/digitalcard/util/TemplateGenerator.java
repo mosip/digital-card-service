@@ -24,8 +24,9 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
-
+import java.util.Base64;
+import java.util.Map;
+import java.util.Properties;
 /**
  * The Class TemplateGenerator.
  * 
@@ -89,8 +90,10 @@ public class TemplateGenerator {
 		try {
 			for (String key : templateFile.split(SEMICOLON)) {
 				String[] parts = key.split(COLON, 2);
-				if(parts[0].equalsIgnoreCase(cardTemplate)){
-					templateFileName=parts[1];
+				if(parts.length>0) {
+					if (parts[0].equalsIgnoreCase(cardTemplate)) {
+						templateFileName = parts[1];
+					}
 				}
 			}
 			InputStream fileTextStream = null;
