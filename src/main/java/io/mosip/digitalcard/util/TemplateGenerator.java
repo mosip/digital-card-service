@@ -18,6 +18,7 @@ import org.apache.velocity.runtime.resource.loader.ClasspathResourceLoader;
 import org.apache.velocity.runtime.resource.loader.FileResourceLoader;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Component;
 
 import java.io.ByteArrayInputStream;
@@ -66,6 +67,9 @@ public class TemplateGenerator {
 	private static String SEMICOLON = ";";
 	private static String COLON = ":";
 
+	@Autowired
+	private Environment environment;
+
 
 	/**
 	 * Gets the template.
@@ -86,18 +90,9 @@ public class TemplateGenerator {
 		//ResponseWrapper<?> responseWrapper;
 		//TemplateResponseDto template;
 		printLogger.debug("TemplateGenerator::getTemplate()::entry");
-		String templateFileName=null;
 		try {
-			for (String key : templateFile.split(SEMICOLON)) {
-				String[] parts = key.split(COLON, 2);
-				if(parts.length>0) {
-					if (parts[0].equalsIgnoreCase(cardTemplate)) {
-						templateFileName = parts[1];
-					}
-				}
-			}
 			InputStream fileTextStream = null;
-			InputStream stream = new ByteArrayInputStream(Base64.getDecoder().decode( utility.getUinCardTemplate(templateFileName)));
+			InputStream stream = new ByteArrayInputStream(Base64.getDecoder().decode(environment.getProperty(cardTemplate)));
 			fileTextStream = getTemplateManager().merge(stream, attributes);
 			printLogger.debug("TemplateGenerator::getTemplate()::exit");
 			return fileTextStream;

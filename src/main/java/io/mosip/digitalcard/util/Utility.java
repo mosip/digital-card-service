@@ -88,9 +88,6 @@ public class Utility {
         return getJSONObject(objectMapper.readValue(regProcessorIdentityJson,JSONObject.class),IDENTITY);
     }
 
-    public String getUinCardTemplate(String cardTemplate) throws Exception {
-        return restClient.getForObject(configServerFileStorageURL + cardTemplate, String.class);
-    }
 
     @SuppressWarnings("unchecked")
     public JSONObject getJSONObject(JSONObject jsonObject, Object key)  {
