@@ -61,9 +61,6 @@ public class TemplateGenerator {
 	@Autowired
 	private Utility utility;
 
-	@Value("${mosip.digitalcard.service.template}")
-	private String templateFile;
-
 	private static String SEMICOLON = ";";
 	private static String COLON = ":";
 
