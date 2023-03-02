@@ -277,7 +277,7 @@ public class DigitalCardServiceImpl implements DigitalCardService {
                 uinCardPd = uinCardPd.concat(getFormattedPasswordAttribute((String) object.toString()).substring(0,4));
             }
         }
-        return uinCardPd;
+        return uinCardPd.toUpperCase();
     }
 
     private String getFormattedPasswordAttribute(String password){
