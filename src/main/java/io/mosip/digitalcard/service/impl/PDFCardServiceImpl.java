@@ -161,6 +161,7 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 				attributes.put("isPhotoSet",isPhotoSet);
 			}
 			uin = decryptedCredentialJson.getString("UIN");
+			attributes.putAll(additionalAttributes);
 			if(additionalAttributes.containsKey(TEMPLATE_TYPE_CODE)) {
 				templateTypeCode = additionalAttributes.get(TEMPLATE_TYPE_CODE).toString();
 			}
