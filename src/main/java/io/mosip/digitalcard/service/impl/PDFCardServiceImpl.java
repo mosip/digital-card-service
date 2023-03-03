@@ -36,7 +36,6 @@ import org.json.simple.parser.ParseException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.env.Environment;
-import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
 
@@ -128,11 +127,9 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 	/*@Value("${mosip.digitalcard.templateTypeCode:RPR_UIN_CARD_TEMPLATE}")
 	private String uinCardTemplate;*/
 
-	@Value("${mosip.digitalcard.uin.card.template:uin_card_template.html}")
-	private String uinCardTemplate;
+	@Value("${mosip.digitalcard.uin.card.default.templateTypeCode:RPR_UIN_CARD_TEMPLATE}")
+	private String defaultTemplateTypeCode;
 
-	@Value("${mosip.digitalcard.vid.templateTypeCode:vid-card-type}")
-	private String vidCardTemplate;
 
 	@Autowired
 	private ObjectMapper objectMapper;
@@ -154,7 +151,7 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 		boolean isPhotoSet=false;
 		String individualBio = null;
 		Map<String, Object> attributes = new LinkedHashMap<>();
-		String templateTypeCode = uinCardTemplate;
+		String templateTypeCode = defaultTemplateTypeCode;
 		byte[] pdfbytes = null;
 		try {
 			if(decryptedCredentialJson.has("biometrics")){
