@@ -7,6 +7,7 @@ on:
       - main
       - 1.1.5.6
       - develop
+      - release-1*
 jobs:
   build:
     runs-on: ubuntu-latest
