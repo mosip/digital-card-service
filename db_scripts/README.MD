@@ -176,3 +176,17 @@ This should be the path if we are performing deployment for the database name **
 Kindly ignore **NOTICE** or **SKIPPING** messages. As these messages states that particular action is already in place hence sql script ignore performing again.
 
 ### Post deployment process, look out for each database deployment log files which captures all stages of deployment. Log file path is defined in the properties file of the respective databases.
+
+
+## Install in existing MOSIP K8 Cluster
+These scripts are automatically run with below mentioned script in existing k8 cluster with Postgres installed.
+### Install
+* Set your kube_config file or kube_config variable on PC.
+* Update `init_values.yaml` with db-common-password from the postgres namespace in the required field `dbUserPasswords.dbuserPassword` and ensure `databases.mosip_digitalcard` is enabled.
+  ```
+  ./init_db.sh`
+  ```
+
+## Install for developers
+Developers may run the SQLs using `<db name>/deploy.sh` script.
+
