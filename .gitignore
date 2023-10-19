@@ -1,1 +1,3 @@
 .idea
+helm/*/harts
+helm/*/Chart.lock
