@@ -58,7 +58,7 @@ databases:
       user: postgres
       secret:
         name: postgres-postgresql
-        key: postgresql-password
+        key: postgres-password
     dml: 0
     repoUrl: https://github.com/mosip/digital-card-service.git
     branch: develop
