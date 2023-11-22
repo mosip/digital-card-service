@@ -1,5 +1,6 @@
 \c mosip_digitalcard
 
+
 GRANT CONNECT
    ON DATABASE mosip_digitalcard
    TO digitalcarduser;
