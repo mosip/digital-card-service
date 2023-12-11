@@ -1,4 +1,4 @@
-## MOSIP Hotlisting Database (mosip_hotlist) scripts inventory and deployment guidelines on postgresql database. 
+## MOSIP Hotlisting Database (mosip_hotlist) scripts inventory and deployment guidelines on postgresql database.
 
 #### The details disclosed below gives a clear information on complete database script structure with the instructions for database scripts deployments.
 
