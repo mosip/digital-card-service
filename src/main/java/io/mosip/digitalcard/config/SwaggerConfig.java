@@ -3,13 +3,13 @@ package io.mosip.digitalcard.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import springfox.documentation.builders.ApiInfoBuilder;
-import springfox.documentation.builders.PathSelectors;
-import springfox.documentation.builders.RequestHandlerSelectors;
-import springfox.documentation.service.ApiInfo;
-import springfox.documentation.spi.DocumentationType;
-import springfox.documentation.spring.web.plugins.Docket;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
+//import springfox.documentation.builders.ApiInfoBuilder;
+//import springfox.documentation.builders.PathSelectors;
+//import springfox.documentation.builders.RequestHandlerSelectors;
+//import springfox.documentation.service.ApiInfo;
+//import springfox.documentation.spi.DocumentationType;
+//import springfox.documentation.spring.web.plugins.Docket;
+//import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -23,8 +23,8 @@ import java.util.Set;
  * @since 1.0.0
  *
  */
-@Configuration
-@EnableSwagger2
+//@Configuration
+//@EnableSwagger2
 public class SwaggerConfig {
 
 	/**
@@ -59,43 +59,43 @@ public class SwaggerConfig {
 	 * 
 	 * @return {@link ApiInfo}
 	 */
-	private ApiInfo apiInfo() {
-		return new ApiInfoBuilder().title(TITLE).description(DISCRIBTION).version(DIGITALCARD_SERVICE_VERSION).build();
-	}
+//	private ApiInfo apiInfo() {
+//		return new ApiInfoBuilder().title(TITLE).description(DISCRIBTION).version(DIGITALCARD_SERVICE_VERSION).build();
+//	}
 
 	/**
 	 * Produce Docket bean
 	 * 
 	 * @return Docket bean
 	 */
-	@Bean
-	public Docket api() {
-		boolean swaggerBaseUrlSet = false;
-		if (!localEnv && swaggerBaseUrl != null && !swaggerBaseUrl.isEmpty()) {
-			try {
-				proto = new URL(swaggerBaseUrl).getProtocol();
-				host = new URL(swaggerBaseUrl).getHost();
-				port = new URL(swaggerBaseUrl).getPort();
-				if (port == -1) {
-					hostWithPort = host;
-				} else {
-					hostWithPort = host + ":" + port;
-				}
-				swaggerBaseUrlSet = true;
-			} catch (MalformedURLException e) {
-				
-			}
-		}
-
-		Docket docket = new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo())
-				.groupName(TITLE).select().apis(RequestHandlerSelectors.any())
-				.paths(PathSelectors.regex("(?!/(error).*).*")).build();
-		if (swaggerBaseUrlSet) {
-			docket.protocols(protocols()).host(hostWithPort);
-		}
-
-		return docket;
-	}
+//	@Bean
+//	public Docket api() {
+//		boolean swaggerBaseUrlSet = false;
+//		if (!localEnv && swaggerBaseUrl != null && !swaggerBaseUrl.isEmpty()) {
+//			try {
+//				proto = new URL(swaggerBaseUrl).getProtocol();
+//				host = new URL(swaggerBaseUrl).getHost();
+//				port = new URL(swaggerBaseUrl).getPort();
+//				if (port == -1) {
+//					hostWithPort = host;
+//				} else {
+//					hostWithPort = host + ":" + port;
+//				}
+//				swaggerBaseUrlSet = true;
+//			} catch (MalformedURLException e) {
+//
+//			}
+//		}
+//
+//		Docket docket = new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo())
+//				.groupName(TITLE).select().apis(RequestHandlerSelectors.any())
+//				.paths(PathSelectors.regex("(?!/(error).*).*")).build();
+//		if (swaggerBaseUrlSet) {
+//			docket.protocols(protocols()).host(hostWithPort);
+//		}
+//
+//		return docket;
+//	}
 
 	private Set<String> protocols() {
 		Set<String> protocols = new HashSet<>();
