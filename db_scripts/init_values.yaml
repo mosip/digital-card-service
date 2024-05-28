@@ -52,7 +52,7 @@ databases:
   
   mosip_digitalcard:
     enabled: true
-    host: "postgres-postgresql"
+    host: "postgres-postgresql.postgres"
     port: 5432
     su:
       user: postgres
