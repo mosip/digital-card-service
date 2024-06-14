@@ -46,6 +46,9 @@ databases:
   
   mosip_hotlist:
     enabled: false
+    
+  mosip_otp:
+    enabled: false
   
   mosip_resident:
     enabled: false
