@@ -159,6 +159,7 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 				String individualBiometric = new String(individualBio);
 				isPhotoSet = setApplicantPhoto(individualBiometric, attributes);
 				attributes.put("isPhotoSet",isPhotoSet);
+				logger.info("biometric flag: {}",isPhotoSet);
 			}
 			uin = decryptedCredentialJson.getString("UIN");
 			attributes.putAll(additionalAttributes);
@@ -193,15 +194,19 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 		}
 
 		catch (QrcodeGenerationException e) {
+			logger.info("ERROR[] :{}",e);
 			logger.error(DigitalCardServiceErrorCodes.QRCODE_NOT_GENERATED.getErrorMessage(), e);
 			throw e;
 		}  catch (PDFGeneratorException e) {
+			logger.info("ERROR[] :{}",e);
 			logger.error(DigitalCardServiceErrorCodes.PDF_NOT_GENERATED.getErrorMessage() ,e);
 			throw e;
 		}catch (JsonParseException | JsonMappingException e) {
+			logger.info("ERROR[] :{}",e);
 			logger.error(DigitalCardServiceErrorCodes.ATTRIBUTE_NOT_SET.getErrorMessage() ,e);
 			throw e;
 		} catch (Exception e) {
+			logger.info("ERROR[] :{}",e);
 			logger.error(PDFGeneratorExceptionCodeConstant.PDF_EXCEPTION.getErrorMessage() ,e);
 			throw e;
 		}
@@ -326,7 +331,9 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 			}
 			} catch (JsonParseException | JsonMappingException | DigitalCardServiceException e) {
 				logger.error("Error while parsing Json file" ,e);
-			}
+				logger.info("ERROR[] :{}",e);
+
+		}
 
 	}
 
@@ -367,6 +374,7 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 			pdfSignatured = Base64.decodeBase64(signatureResponseDto.getData());
 
 		} catch (Exception e) {
+			logger.info("ERROR[] :{}",e);
 			logger.error(io.mosip.kernel.pdfgenerator.itext.constant.PDFGeneratorExceptionCodeConstant.PDF_EXCEPTION.getErrorMessage(),e.getMessage()
 					+ ExceptionUtils.getStackTrace(e));
 		}

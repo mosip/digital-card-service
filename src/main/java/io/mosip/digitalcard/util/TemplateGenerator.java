@@ -95,6 +95,7 @@ public class TemplateGenerator {
 			return fileTextStream;
 
 		} catch (TemplateResourceNotFoundException | TemplateParsingException | TemplateMethodInvocationException e) {
+			printLogger.info("ERROR[] :{}",e);
 			printLogger.error(e.getMessage()
 							+ ExceptionUtils.getStackTrace(e));
 
