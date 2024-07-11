@@ -20,9 +20,8 @@ import org.springframework.context.annotation.Configuration;
  * @implSpec upgrade the Swagger2.0 to OpenAPI (Swagger3.0)
  *
  */
-@Configuration
 public class SwaggerConfig {
-	
+
 	private static final Logger logger = LoggerFactory.getLogger(SwaggerConfig.class);
 
 	@Autowired
