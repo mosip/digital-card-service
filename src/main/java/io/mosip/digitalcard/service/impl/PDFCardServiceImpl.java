@@ -156,6 +156,7 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 		try {
 			if(decryptedCredentialJson.has("biometrics")){
 				individualBio = decryptedCredentialJson.getString("biometrics");
+				logger.info("individualBio: {}",individualBio.length());
 				String individualBiometric = new String(individualBio);
 				isPhotoSet = setApplicantPhoto(individualBiometric, attributes);
 				attributes.put("isPhotoSet",isPhotoSet);
@@ -174,7 +175,9 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 				if (!isPhotoSet) {
 					logger.debug(DigitalCardServiceErrorCodes.APPLICANT_PHOTO_NOT_SET.name());
 				}
+				logger.info("attributes count: {}",attributes.size());
 				setTemplateAttributes(decryptedCredentialJson, attributes);
+				logger.info("attributes count after: {}",attributes.size());
 				// putting additional attribute for vid card
 				attributes.put(IdType.UIN.toString(), uin);
 				boolean isQRcodeSet = setQrCode(decryptedCredentialJson.toString(), attributes,isPhotoSet);
@@ -264,10 +267,12 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 			CbeffToBiometricUtil util = new CbeffToBiometricUtil(cbeffutil);
 			List<String> subtype = new ArrayList<>();
 			byte[] photoByte = util.getImageBytes(value, FACE, subtype);
+			logger.info("photoByte: {}",photoByte.length);
 			convertRequestDto.setVersion("ISO19794_5_2011");
 			convertRequestDto.setInputBytes(photoByte);
 			if (photoByte != null) {
 				byte[] data = FaceDecoder.convertFaceISOToImageBytes(convertRequestDto);
+				logger.info("data: {}",data.length);
 				String encodedData = StringUtils.newStringUtf8(Base64.encodeBase64(data, false));
 				attributes.put(APPLICANT_PHOTO, "data:image/png;base64," + encodedData);
 				isPhotoSet = true;
