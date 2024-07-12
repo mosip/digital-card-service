@@ -91,7 +91,7 @@ public class DigitalCardController {
             logger.info("successfully gnerated the digitalcard.");
         }catch (Exception e){
             logger.error("Db User name-"+environment.getProperty("javax.persistence.jdbc.user"));
-            logger.error("digitalcard generation failed.\n" + ExceptionUtils.getStackTrace(e));
+            logger.error("digitalcard generation failed: {}" + ExceptionUtils.getStackTrace(e));
 
         }
         return new ResponseEntity<>("request accepted.", HttpStatus.OK);

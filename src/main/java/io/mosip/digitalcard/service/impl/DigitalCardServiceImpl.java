@@ -135,22 +135,22 @@ public class DigitalCardServiceImpl implements DigitalCardService {
             }
             if (isPasswordProtected) {
                 password = getPassword(decryptedCredentialJson);
-                logger.info("password: {}",password);
             }
             byte[] pdfBytes=pdfCardServiceImpl.generateCard(decryptedCredentialJson, credentialType,password,additionalAttributes);
             digitalCardStatusUpdate(transactionId,pdfBytes,credentialType,rid);
+            logger.info("successfully generated the digitalcard for rid: {}",rid);
         }catch (QrcodeGenerationException e) {
             loginErrorDetails(rid,DigitalCardServiceErrorCodes.QRCODE_NOT_GENERATED.getError());
-            logger.error(DigitalCardServiceErrorCodes.QRCODE_NOT_GENERATED.getErrorMessage(), e);
+            logger.error(DigitalCardServiceErrorCodes.QRCODE_NOT_GENERATED.getErrorMessage()+": {}",e);
         } catch (PDFGeneratorException e) {
             loginErrorDetails(rid,DigitalCardServiceErrorCodes.PDF_NOT_GENERATED.getError());
-            logger.error(DigitalCardServiceErrorCodes.PDF_NOT_GENERATED.getErrorMessage() ,e);
+            logger.error(DigitalCardServiceErrorCodes.PDF_NOT_GENERATED.getErrorMessage()+": {}" ,e);
         }catch (JsonParseException | JsonMappingException e) {
             loginErrorDetails(rid,DigitalCardServiceErrorCodes.ATTRIBUTE_NOT_SET.getError());
-            logger.error(DigitalCardServiceErrorCodes.ATTRIBUTE_NOT_SET.getErrorMessage() ,e);
+            logger.error(DigitalCardServiceErrorCodes.ATTRIBUTE_NOT_SET.getErrorMessage()+": {}" ,e);
         } catch (Exception e){
             loginErrorDetails(rid, DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getError());
-            logger.error(DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorMessage() , e);
+            logger.error(DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorMessage()+": {}" , e);
             throw new DigitalCardServiceException(DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorCode(),DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorMessage());
         }
     }

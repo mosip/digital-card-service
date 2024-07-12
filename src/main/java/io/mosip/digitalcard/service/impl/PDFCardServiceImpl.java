@@ -160,7 +160,6 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 				String individualBiometric = new String(individualBio);
 				isPhotoSet = setApplicantPhoto(individualBiometric, attributes);
 				attributes.put("isPhotoSet",isPhotoSet);
-				logger.info("biometric flag: {}",isPhotoSet);
 			}
 			uin = decryptedCredentialJson.getString("UIN");
 			attributes.putAll(additionalAttributes);
@@ -175,9 +174,9 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 				if (!isPhotoSet) {
 					logger.debug(DigitalCardServiceErrorCodes.APPLICANT_PHOTO_NOT_SET.name());
 				}
-				logger.info("attributes count: {}",attributes.size());
+				logger.info("attributes count before setTemplateAttributes: {}",attributes.size());
 				setTemplateAttributes(decryptedCredentialJson, attributes);
-				logger.info("attributes count after: {}",attributes.size());
+				logger.info("attributes count after setTemplateAttributes: {}",attributes.size());
 				// putting additional attribute for vid card
 				attributes.put(IdType.UIN.toString(), uin);
 				boolean isQRcodeSet = setQrCode(decryptedCredentialJson.toString(), attributes,isPhotoSet);
@@ -197,19 +196,15 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 		}
 
 		catch (QrcodeGenerationException e) {
-			logger.info("ERROR[] :{}",e);
 			logger.error(DigitalCardServiceErrorCodes.QRCODE_NOT_GENERATED.getErrorMessage(), e);
 			throw e;
 		}  catch (PDFGeneratorException e) {
-			logger.info("ERROR[] :{}",e);
 			logger.error(DigitalCardServiceErrorCodes.PDF_NOT_GENERATED.getErrorMessage() ,e);
 			throw e;
 		}catch (JsonParseException | JsonMappingException e) {
-			logger.info("ERROR[] :{}",e);
 			logger.error(DigitalCardServiceErrorCodes.ATTRIBUTE_NOT_SET.getErrorMessage() ,e);
 			throw e;
 		} catch (Exception e) {
-			logger.info("ERROR[] :{}",e);
 			logger.error(PDFGeneratorExceptionCodeConstant.PDF_EXCEPTION.getErrorMessage() ,e);
 			throw e;
 		}
@@ -267,12 +262,11 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 			CbeffToBiometricUtil util = new CbeffToBiometricUtil(cbeffutil);
 			List<String> subtype = new ArrayList<>();
 			byte[] photoByte = util.getImageBytes(value, FACE, subtype);
-			logger.info("photoByte: {}",photoByte.length);
 			convertRequestDto.setVersion("ISO19794_5_2011");
 			convertRequestDto.setInputBytes(photoByte);
 			if (photoByte != null) {
 				byte[] data = FaceDecoder.convertFaceISOToImageBytes(convertRequestDto);
-				logger.info("data: {}",data.length);
+				logger.info("Image data: {}",data.length);
 				String encodedData = StringUtils.newStringUtf8(Base64.encodeBase64(data, false));
 				attributes.put(APPLICANT_PHOTO, "data:image/png;base64," + encodedData);
 				isPhotoSet = true;
@@ -336,8 +330,6 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 			}
 			} catch (JsonParseException | JsonMappingException | DigitalCardServiceException e) {
 				logger.error("Error while parsing Json file" ,e);
-				logger.info("ERROR[] :{}",e);
-
 		}
 
 	}
