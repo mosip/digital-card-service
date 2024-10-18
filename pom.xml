@@ -17,7 +17,7 @@
 	<properties>
 		<maven.compiler.source>21</maven.compiler.source>
 		<maven.compiler.target>21</maven.compiler.target>
-		<mosip.biometric.util.version>1.3.0-SNAPSHOT</mosip.biometric.util.version>
+		<mosip.biometric.util.version>1.3.0-beta.1</mosip.biometric.util.version>
 		<kernel.core.version>1.3.0-beta.1</kernel.core.version>
 		<spring.security.test.version>5.0.5.RELEASE</spring.security.test.version>
 		<springfox.version>2.9.2</springfox.version>
