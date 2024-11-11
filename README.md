@@ -18,22 +18,16 @@ and mvn version - 3.9.6
     $ docker build -f Dockerfile
     ```
 
-## Configuration files
+## Configuration
 Digital Card Service uses the following configuration files that are accessible in this [repository](https://github.com/mosip/mosip-config/tree/master).
 Please refer to the required released tagged version for configuration.
-```
-application-default.properties
-digital-card-default.properties
-```
-
-## Configuration
-[Configuration-DigitalCard](https://github.com/mosip/mosip-config/blob/master/digital-card-default.properties) and
-[Configuration-Application](https://github.com/mosip/mosip-config/blob/master/application-default.properties) defined here.
+1. [Configuration-DigitalCard](https://github.com/mosip/mosip-config/blob/master/digital-card-default.properties)
+2. [Configuration-Application](https://github.com/mosip/mosip-config/blob/master/application-default.properties)
 
 Refer [Module Configuration](https://docs.mosip.io/1.2.0/modules/module-configuration) for location of these files.
 
 ## Deploy
-To deploy Commons services on Kubernetes cluster using Dockers refer to [Sandbox Deployment](https://docs.mosip.io/1.2.0/deploymentnew/v3-installation).
+To deploy digital-card-service on Kubernetes cluster using Dockers refer to [Sandbox Deployment](https://docs.mosip.io/1.2.0/deploymentnew/v3-installation).
 
 ## APIs
 API documentation is available [here](https://mosip.github.io/documentation/1.2.0/1.2.0.html).
