@@ -5,7 +5,7 @@ Service responsible to auto generate digital card once the registration packet i
 Refer to [SQL scripts](db_scripts).
 
 ## Build & run (for developers)
-The project requires JDK 21.0
+The project requires JDK 21.0.3
 and mvn version - 3.9.6
 1. Build and install:
     ```
@@ -19,15 +19,15 @@ and mvn version - 3.9.6
     ```
 
 ## Configuration files
-Digital Card Service uses the following configuration files:
+Digital Card Service uses the following configuration files that are accessible in this [repository](https://github.com/mosip/mosip-config/tree/master).
 ```
 application-default.properties
 digital-card-default.properties
 ```
 
 ## Configuration
-[Configuration-DigitalCard](https://github.com/mosip/mosip-config/blob/release-1.3.x/digital-card-default.properties) and
-[Configuration-Application](https://github.com/mosip/mosip-config/blob/release-1.3.x/application-default.properties) defined here.
+[Configuration-DigitalCard](https://github.com/mosip/mosip-config/blob/master/digital-card-default.properties) and
+[Configuration-Application](https://github.com/mosip/mosip-config/blob/master/application-default.properties) defined here.
 
 Refer [Module Configuration](https://docs.mosip.io/1.2.0/modules/module-configuration) for location of these files.
 
@@ -35,7 +35,7 @@ Refer [Module Configuration](https://docs.mosip.io/1.2.0/modules/module-configur
 To deploy Commons services on Kubernetes cluster using Dockers refer to [Sandbox Deployment](https://docs.mosip.io/1.2.0/deploymentnew/v3-installation).
 
 ## APIs
-API documentation is available [here](https://mosip.github.io/documentation/).
+API documentation is available [here](https://mosip.github.io/documentation/1.2.0/1.2.0.html).
 
 ## License
 This project is licensed under the terms of [Mozilla Public License 2.0](LICENSE).
