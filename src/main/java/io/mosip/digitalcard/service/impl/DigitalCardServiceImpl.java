@@ -275,7 +275,7 @@ public class DigitalCardServiceImpl implements DigitalCardService {
                 org.json.simple.JSONObject json = (org.json.simple.JSONObject) object;
                 uinCardPd = uinCardPd.concat((String) json.get(VALUE));
             } else {
-                uinCardPd = uinCardPd.concat(getFormattedPasswordAttribute((String) object.toString()).substring(0,4));
+                uinCardPd = uinCardPd.concat(getFormattedPasswordAttribute((String) Objects.requireNonNull(object).toString()).substring(0,4));
             }
         }
         return uinCardPd.toUpperCase();
