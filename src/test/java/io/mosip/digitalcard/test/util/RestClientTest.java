@@ -16,9 +16,18 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThrows;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RestClientTest {
@@ -33,7 +42,7 @@ public class RestClientTest {
     private RestTemplate restTemplate;
 
     @Test
-    public void postApiTest() throws ApisResourceAccessException {
+    public void postApiTest_Success() throws ApisResourceAccessException {
         ApiName apiName = ApiName.CREDENTIAL_STATUS_URL;
         List<String> pathSegments = Arrays.asList("segment1", "segment2");
         String queryParamName = "param1,param2";

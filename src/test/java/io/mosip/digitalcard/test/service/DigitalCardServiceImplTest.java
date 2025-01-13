@@ -2,7 +2,11 @@ package io.mosip.digitalcard.test.service;
 
 import io.mosip.digitalcard.constant.DigitalCardServiceErrorCodes;
 import io.mosip.digitalcard.controller.DigitalCardController;
-import io.mosip.digitalcard.dto.*;
+import io.mosip.digitalcard.dto.DigitalCardStatusResponseDto;
+import io.mosip.digitalcard.dto.SimpleType;
+import io.mosip.digitalcard.dto.CredentialResponse;
+import io.mosip.digitalcard.dto.CredentialRequestDto;
+import io.mosip.digitalcard.dto.DataShareDto;
 import io.mosip.digitalcard.entity.DigitalCardTransactionEntity;
 import io.mosip.digitalcard.exception.DigitalCardServiceException;
 import io.mosip.digitalcard.repositories.DigitalCardTransactionRepository;
@@ -65,7 +69,7 @@ public class DigitalCardServiceImplTest {
     private String rid = "testRid";
 
     @Test
-    public void generateDigitalCardTest() throws Exception {
+    public void generateDigitalCardTest_Success() throws Exception {
         String credential="encryptedCredential";
         String credentialType="c_type";
         String eventId="54154f54";
@@ -173,7 +177,7 @@ public class DigitalCardServiceImplTest {
     }
 
     @Test
-    public void saveTransactionDetailsTest() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public void saveTransactionDetailsTest_Success() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         CredentialResponse credentialResponse=new CredentialResponse();
         credentialResponse.setId("45564");
         credentialResponse.setRequestId("ft656ft");
@@ -196,7 +200,7 @@ public class DigitalCardServiceImplTest {
     }
 
     @Test
-    public void testDigitalCardStatusUpdate_NewTransaction() throws Exception {
+    public void testDigitalCardStatusUpdate_NewTransaction_Success() throws Exception {
         byte[] data = new byte[]{1, 2, 3, 4};
         String dataSharePolicyId="mpolicy-default-digitalcard";
         String dataSharePartnerId="mpartner-default-digitalcard";
@@ -233,7 +237,7 @@ public class DigitalCardServiceImplTest {
     }
 
     @Test
-    public void testGetRid() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
+    public void testGetRid_Success() throws NoSuchMethodException, InvocationTargetException, IllegalAccessException {
         Method method = DigitalCardServiceImpl.class.getDeclaredMethod("getRid", Object.class);
         method.setAccessible(true);
         Object id = "http://example.com/credentials/123";
@@ -243,7 +247,7 @@ public class DigitalCardServiceImplTest {
     }
 
     @Test
-    public void getPasswordTest() throws NoSuchMethodException {
+    public void getPasswordTest_Exception() throws NoSuchMethodException {
         Method getPasswordMethod = DigitalCardServiceImpl.class.getDeclaredMethod("getPassword", org.json.JSONObject.class);
         getPasswordMethod.setAccessible(true);
         assertThrows(Exception.class, () -> {
@@ -252,7 +256,7 @@ public class DigitalCardServiceImplTest {
     }
 
     @Test
-    public void testGetPassword() throws Exception {
+    public void testGetPassword_Success() throws Exception {
         String digitalCardPassword="attr1|attr2|attr3";
         String templateLang="eng";
 
@@ -266,7 +270,7 @@ public class DigitalCardServiceImplTest {
     }
 
     @Test
-    public void getFormattedPasswordAttributeTestNew() {
+    public void getFormattedPasswordAttributeTestNew_Success() {
         String password="hvhjeyeyd#hvhdv@";
         ReflectionTestUtils.invokeMethod(digitalCardService, "getFormattedPasswordAttribute", password);
     }

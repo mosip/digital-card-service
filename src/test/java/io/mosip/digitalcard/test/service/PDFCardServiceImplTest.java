@@ -31,14 +31,26 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.List;
+import java.util.ArrayList;
 import org.json.simple.JSONObject;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyList;
 import static org.mockito.Mockito.verify;
 
 @SpringBootTest(classes = DigitalCardServiceTest.class)
@@ -73,7 +85,7 @@ public class PDFCardServiceImplTest {
 
 
     @Test
-    public void generateCardTest() throws Exception {
+    public void generateCardTest_Success() throws Exception {
         org.json.JSONObject decryptedCredentialJson = new org.json.JSONObject();
         decryptedCredentialJson.put("UIN", "testUIN");
         decryptedCredentialJson.put("biometrics", "sampleBiometricsData");
@@ -103,7 +115,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test
-    public void setQrCodeTest() throws QrcodeGenerationException, IOException {
+    public void setQrCodeTest_Success() throws QrcodeGenerationException, IOException {
         String qrString = "{\"biometrics\":\"sampleBiometricsData\", \"otherKey\":\"otherValue\"}";
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("xyz","cdcs");
@@ -156,7 +168,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test
-    public void generateUinCardTest() throws IOException {
+    public void generateUinCardTest_Success() throws IOException {
         InputStream in = new ByteArrayInputStream(new byte[]{1, 2, 3, 4});
         String password = "samplePassword";
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -178,7 +190,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test
-    public void testGenerateUinCard() throws Exception {
+    public void testGenerateUinCard_Success() throws Exception {
         InputStream inputStream = new ByteArrayInputStream("pdf content".getBytes());
         String password = "testPassword";
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();

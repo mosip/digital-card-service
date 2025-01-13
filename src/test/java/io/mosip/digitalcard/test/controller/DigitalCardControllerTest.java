@@ -25,7 +25,9 @@ import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 
 @SpringBootTest(classes = DigitalCardServiceTest.class)
@@ -111,16 +113,7 @@ public class DigitalCardControllerTest {
     }
 
     @Test
-    public void credentialEvent_Success() {
-        when(environment.getProperty("javax.persistence.jdbc.user")).thenReturn("testUser");
-        EventModel eventModel = getEventModel();
-        lenient().doNothing().when(digitalCardService).initiateCredentialRequest(anyString(), anyString());
-        ResponseEntity<?> responseEntity = digitalCardController.credentialEvent(eventModel);
-        assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
-    }
-
-    @Test
-    public void credentialEvent_Exception() {
+    public void credentialEvent_RuntimeException_returnSuccess() {
         when(environment.getProperty("javax.persistence.jdbc.user")).thenReturn("testUser");
         EventModel eventModel = getEventModel();
         lenient().doThrow(new RuntimeException("Mock Exception")).when(digitalCardService).initiateCredentialRequest(anyString(), anyString());

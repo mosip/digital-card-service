@@ -18,7 +18,9 @@ import java.util.Base64;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
 import static org.powermock.api.mockito.PowerMockito.when;
@@ -66,7 +68,6 @@ public class TemplateGeneratorTest {
 
         assertNotNull(templateManager);
         assertTrue(templateManager instanceof TemplateManagerImpl);
-
     }
 
 }

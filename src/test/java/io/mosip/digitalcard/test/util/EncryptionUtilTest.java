@@ -16,10 +16,15 @@ import org.springframework.core.env.Environment;
 import io.mosip.digitalcard.dto.CryptomanagerResponseDto;
 import org.springframework.http.MediaType;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThrows;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 import static org.powermock.api.mockito.PowerMockito.mock;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -66,7 +71,7 @@ public class EncryptionUtilTest {
 
 
     @Test
-    public void testDecryptDataTest() {
+    public void testDecryptDataTest_Success() {
         String dataToBedecrypted = "encryptedData";
         String responseData = "decryptedData";
         CryptomanagerResponseDto responseDto = new CryptomanagerResponseDto();

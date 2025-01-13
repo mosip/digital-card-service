@@ -27,9 +27,16 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.*;
+import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.isNull;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.times;
 
 @SpringBootTest(classes = DigitalCardServiceTest.class)
 @RunWith(MockitoJUnitRunner.class)
@@ -52,7 +59,7 @@ public class CredentialUtilTest {
     }
 
     @Test
-    public void reqCredentialTest() throws ApisResourceAccessException {
+    public void reqCredentialTest_Success() throws ApisResourceAccessException {
         RequestWrapper<CredentialRequestDto> requestDto = new RequestWrapper<>();
         CredentialRequestDto credentialRequestDto = new CredentialRequestDto();
         requestDto.setRequest(credentialRequestDto);
@@ -67,7 +74,7 @@ public class CredentialUtilTest {
 
     }
     @Test
-    public void getStatusTest() {
+    public void getStatusTest_Success() {
         List<String> pathSegments = new ArrayList<>();
         pathSegments.add(requestId);
 
