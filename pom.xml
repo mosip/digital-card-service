@@ -358,10 +358,12 @@
 					<skipTests>false</skipTests>
 					<skip>false</skip>
 					<argLine>
-						${argLine} --add-opens java.xml/jdk.xml.internal=ALL-UNNAMED
+						${argLine}
+						--add-opens java.xml/jdk.xml.internal=ALL-UNNAMED
+						--add-opens java.base/java.lang=ALL-UNNAMED
 						--add-modules=ALL-SYSTEM
-						--add-opens=java.base/java.lang=ALL-UNNAMED
-						--illegal-access=permit
+						--illegal-access=debug
+						--enable-preview
 					</argLine>
 				</configuration>
 			</plugin>
