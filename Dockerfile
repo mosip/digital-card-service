@@ -84,7 +84,7 @@ USER ${container_user_uid}:${container_user_gid}
 
 EXPOSE 8099
 
-CMD wget "${artifactory_url_env}"/artifactory/libs-release-local/pdf-generator/pdf-generator.zip && \
+CMD wget "${artifactory_url_env}/artifactory/libs-release-local/pdf-generator/pdf-generator.zip" && \
     unzip pdf-generator.zip -d "${loader_path_env}/pdf-generator" && \
     rm -rf pdf-generator.zip && \
     wget -q --show-progress "${iam_adapter_url_env}" -O "${loader_path_env}/kernel-auth-adapter.jar" && \
