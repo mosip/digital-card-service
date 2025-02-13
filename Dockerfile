@@ -91,4 +91,5 @@ CMD wget "${artifactory_url_env}"/artifactory/libs-release-local/pdf-generator/p
     java -Dloader.path="${loader_path_env},${loader_path_env}/pdf-generator" \
          --add-modules=ALL-SYSTEM \
          --add-opens=java.base/java.lang=ALL-UNNAMED \
+         -XX:-UseG1GC -XX:-UseParallelGC -XX:-UseShenandoahGC -Xms1g -Xmx2g  -XX:+ExplicitGCInvokesConcurrent -XX:+UseZGC -XX:+ZGenerational -XX:+UnlockExperimentalVMOptions -XX:+UseStringDeduplication -XX:+HeapDumpOnOutOfMemoryError -XX:+UseCompressedOops -XX:MaxGCPauseMillis=200 -Dfile.encoding=UTF-8 \
          -jar -Dspring.cloud.config.label="${spring_config_label_env}" -Dspring.profiles.active="${active_profile_env}"  -Dspring.cloud.config.uri="${spring_config_url_env}" digital-card-service.jar; \
