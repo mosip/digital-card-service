@@ -77,10 +77,10 @@ VOLUME ${work_dir}/logs ${work_dir}/Glowroot
 COPY ./target/digital-card-service-*.jar digital-card-service.jar
 
 # change permissions of file inside working dir
-#UN chown -R ${container_user}:${container_user} /home/${container_user}
+#RUN chown -R ${container_user}:${container_user} /home/${container_user}
 
 # select container user for all tasks
-#SER ${container_user_uid}:${container_user_gid}
+#USER ${container_user_uid}:${container_user_gid}
 
 EXPOSE 8099
 
