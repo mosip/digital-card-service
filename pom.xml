@@ -13,6 +13,8 @@
 	<artifactId>digital-card-service</artifactId>
 	<version>1.3.0-beta.1</version>
 	<name>digital-card-service</name>
+	<url>https://github.com/mosip/digital-card-service</url>
+	<description>This is a project for MOSIP printing card functionality.</description>
 
 	<properties>
 		<maven.compiler.source>21</maven.compiler.source>
