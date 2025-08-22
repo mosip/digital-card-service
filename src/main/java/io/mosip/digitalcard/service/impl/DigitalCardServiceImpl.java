@@ -149,7 +149,7 @@ public class DigitalCardServiceImpl implements DigitalCardService {
             logger.error(DigitalCardServiceErrorCodes.ATTRIBUTE_NOT_SET.getErrorMessage()+": {}" ,e);
         } catch (Exception e){
             loginErrorDetails(rid, DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getError());
-            logger.error(DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorMessage()+": {}" , e);
+            logger.error(DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorMessage()+": {}" , DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorMessage());
             throw new DigitalCardServiceException(DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorCode(),DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorMessage());
         }
     }
@@ -190,7 +190,7 @@ public class DigitalCardServiceImpl implements DigitalCardService {
             CredentialResponse credentialResponse = credentialUtil.reqCredential(credentialRequestDto);
             saveTransactionDetails(credentialResponse, ridHash);
         } catch (DigitalCardServiceException e) {
-            logger.error(DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorMessage(),e);
+            logger.error(DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorMessage(),DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorMessage());
             throw new DigitalCardServiceException(DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_CREATED.getErrorCode(),DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_CREATED.getErrorMessage());
         }
     }
