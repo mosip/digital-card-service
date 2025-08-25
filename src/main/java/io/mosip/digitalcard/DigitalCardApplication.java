@@ -20,7 +20,7 @@ import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 public class DigitalCardApplication {
 
     @Bean
-    public CredentialsVerifier credentialsVerifier() {
+    public CredentialsVerifier credentialsVerifier() { 
         return new CredentialsVerifier();
     }
     @Bean
