@@ -84,11 +84,14 @@ COPY ./target/digital-card-service-*.jar digital-card-service.jar
 
 EXPOSE 8099
 
-CMD wget "${artifactory_url_env}"/artifactory/libs-release-local/pdf-generator/pdf-generator.zip && \
-    unzip pdf-generator.zip -d "${loader_path_env}/pdf-generator" && \
-    rm -rf pdf-generator.zip && \
-    wget -q --show-progress "${iam_adapter_url_env}" -O "${loader_path_env}/kernel-auth-adapter.jar" && \
-    java -XX:-UseG1GC -XX:-UseParallelGC -XX:-UseShenandoahGC -XX:+ExplicitGCInvokesConcurrent -XX:+UseZGC -XX:+ZGenerational -XX:+UnlockExperimentalVMOptions -XX:+UseStringDeduplication -XX:+HeapDumpOnOutOfMemoryError -XX:+UseCompressedOops -XX:MaxGCPauseMillis=200 -Dfile.encoding=UTF-8 -Dloader.path="${loader_path_env},${loader_path_env}/pdf-generator" \
-         --add-modules=ALL-SYSTEM \
-         --add-opens=java.base/java.lang=ALL-UNNAMED \
-         -jar -Dspring.cloud.config.label="${spring_config_label_env}" -Dspring.profiles.active="${active_profile_env}"  -Dspring.cloud.config.uri="${spring_config_url_env}" digital-card-service.jar; \
+CMD if [ "$is_glowroot_env" = "present" ]; then \
+    wget "${artifactory_url_env}"/artifactory/libs-release-local/io/mosip/testing/glowroot.zip ; \
+    unzip glowroot.zip ; \
+    rm -rf glowroot.zip ; \
+    sed -i 's/<service_name>/digital-card-service/g' glowroot/glowroot.properties ; \
+    wget -q --show-progress "${iam_adapter_url_env}" -O "${loader_path_env}"/kernel-auth-adapter.jar; \
+    java -Dloader.path="${loader_path_env}" --add-modules=ALL-SYSTEM --add-opens=java.base/java.lang=ALL-UNNAMED -jar -javaagent:glowroot/glowroot.jar -Dspring.cloud.config.label="${spring_config_label_env}" -Dspring.profiles.active="${active_profile_env}" -Dspring.cloud.config.uri="${spring_config_url_env}" digital-card-service.jar ; \
+    else \
+    wget -q --show-progress "${iam_adapter_url_env}" -O "${loader_path_env}"/kernel-auth-adapter.jar; \
+    java -Dloader.path="${loader_path_env}" --add-modules=ALL-SYSTEM --add-opens=java.base/java.lang=ALL-UNNAMED -jar -Dspring.cloud.config.label="${spring_config_label_env}" -Dspring.profiles.active="${active_profile_env}" -Dspring.cloud.config.uri="${spring_config_url_env}" digital-card-service.jar ; \
+    fi
