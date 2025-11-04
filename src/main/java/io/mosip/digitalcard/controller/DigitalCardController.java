@@ -88,7 +88,7 @@ public class DigitalCardController {
             digitalCardServiceImpl.generateDigitalCard(eventModel.getEvent().getData().containsKey("credential")?eventModel.getEvent().getData().get("credential").toString():null,
                     eventModel.getEvent().getData().get("credentialType").toString(),
                     eventModel.getEvent().getDataShareUri(), eventModel.getEvent().getId(), eventModel.getEvent().getTransactionId(),additionalAttributes);
-            logger.info("successfully gnerated the digitalcard.");
+            logger.info("successfully generated the digitalcard.");
         }catch (Exception e){
             logger.error("Db User name-"+environment.getProperty("javax.persistence.jdbc.user"));
             logger.error("digitalcard generation failed: {}" + ExceptionUtils.getStackTrace(e));
