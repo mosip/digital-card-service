@@ -93,7 +93,7 @@ public class ApiExceptionHandler {
 	public ResponseEntity<ResponseWrapper<ServiceError>> defaultErrorHandler(
 			final HttpServletRequest httpServletRequest, Exception e) throws IOException {
 		ResponseWrapper<ServiceError> errorResponse = setErrors(httpServletRequest);
-		ServiceError error = new ServiceError(DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorCode(), e.getMessage());
+		ServiceError error = new ServiceError(DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorCode(), DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorCode());
 		errorResponse.getErrors().add(error);
 		return new ResponseEntity<>(errorResponse, HttpStatus.OK);
 	}
