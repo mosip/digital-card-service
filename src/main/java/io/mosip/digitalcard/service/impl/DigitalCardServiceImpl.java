@@ -21,7 +21,7 @@ import io.mosip.kernel.core.dataaccess.exception.DataAccessLayerException;
 import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.kernel.core.pdfgenerator.exception.PDFGeneratorException;
 import io.mosip.kernel.core.qrcodegenerator.exception.QrcodeGenerationException;
-import io.mosip.kernel.core.util.DateUtils;
+import io.mosip.kernel.core.util.DateUtils2;
 import io.mosip.kernel.core.websub.model.EventModel;
 import io.mosip.vercred.CredentialsVerifier;
 import org.json.JSONObject;
@@ -212,7 +212,7 @@ public class DigitalCardServiceImpl implements DigitalCardService {
         DataShareDto dataShareDto = null;
         dataShareDto = dataShareUtil.getDataShare(data, dataSharePolicyId, dataSharePartnerId);
         CredentialStatusEvent creEvent = new CredentialStatusEvent();
-        LocalDateTime currentDtime = DateUtils.getUTCCurrentDateTime();
+        LocalDateTime currentDtime = DateUtils2.getUTCCurrentDateTime();
         DigitalCardTransactionEntity digitalCardTransactionEntity=digitalCardTransactionRepository.findByRID(rid);
         if(digitalCardTransactionEntity==null){
             DigitalCardTransactionEntity digitalCardEntity=new DigitalCardTransactionEntity();

@@ -23,7 +23,7 @@ import io.mosip.kernel.core.pdfgenerator.exception.PDFGeneratorException;
 import io.mosip.kernel.core.pdfgenerator.spi.PDFGenerator;
 import io.mosip.kernel.core.qrcodegenerator.exception.QrcodeGenerationException;
 import io.mosip.kernel.core.qrcodegenerator.spi.QrCodeGenerator;
-import io.mosip.kernel.core.util.DateUtils;
+import io.mosip.kernel.core.util.DateUtils2;
 import io.mosip.kernel.qrcode.generator.zxing.constant.QrVersion;
 import io.mosip.vercred.CredentialsVerifier;
 import org.apache.commons.codec.binary.Base64;
@@ -347,9 +347,9 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 			request.setData(Base64.encodeBase64String(out.toByteArray()));
 			DateTimeFormatter format = DateTimeFormatter.ofPattern(env.getProperty(DATETIME_PATTERN));
 			LocalDateTime localdatetime = LocalDateTime
-					.parse(DateUtils.getUTCCurrentDateTimeString(env.getProperty(DATETIME_PATTERN)), format);
+					.parse(DateUtils2.getUTCCurrentDateTimeString(env.getProperty(DATETIME_PATTERN)), format);
 
-			request.setTimeStamp(DateUtils.getUTCCurrentDateTimeString());
+			request.setTimeStamp(DateUtils2.getUTCCurrentDateTimeString());
 			RequestWrapper<PDFSignatureRequestDto> requestWrapper = new RequestWrapper<>();
 
 			requestWrapper.setRequest(request);
