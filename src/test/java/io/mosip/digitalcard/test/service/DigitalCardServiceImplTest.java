@@ -15,6 +15,7 @@ import io.mosip.digitalcard.service.impl.DigitalCardServiceImpl;
 import io.mosip.digitalcard.test.DigitalCardServiceTest;
 import io.mosip.digitalcard.util.*;
 import io.mosip.digitalcard.websub.WebSubSubscriptionHelper;
+import io.mosip.vercred.CredentialsVerifier;
 import io.mosip.kernel.core.logger.spi.Logger;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -65,6 +66,12 @@ public class DigitalCardServiceImplTest {
 
     @Mock
     private DataShareUtil dataShareUtil;
+
+    @Mock
+    private CredentialsVerifier credentialsVerifier;
+
+    @Mock
+    private RestClient restClient;
 
     private String rid = "testRid";
 
@@ -339,6 +346,114 @@ public class DigitalCardServiceImplTest {
     public void testGetParameter_whenNull_thenReturnNull() {
 
         assertNull(ReflectionTestUtils.invokeMethod(digitalCardService, "getParameter", null, "Lang Code"));
+    }
+
+    @Test
+    public void generateDigitalCard_WithDataShareUrl_FetchesCredentialAndGenerates_Success() throws Exception {
+        String dataShareUrl = "http://datasource/cred";
+        String fetchedCredential = "encryptedFromUrl";
+        String decrypted = "{ \"credentialSubject\": { \"id\": \"http://server/credentials/ABC123\", \"name\": \"John\" } }";
+        String transactionId = UUID.randomUUID().toString();
+        String eventId = UUID.randomUUID().toString();
+
+        byte[] pdfBytes = new byte[]{9,8,7};
+        String dataSharePolicyId = "policy-id";
+        String dataSharePartnerId = "partner-id";
+        String topic = "CREDENTIAL_STATUS_UPDATE";
+
+        ReflectionTestUtils.setField(digitalCardService, "verifyCredentialsFlag", true);
+        ReflectionTestUtils.setField(digitalCardService, "isPasswordProtected", true);
+        ReflectionTestUtils.setField(digitalCardService, "dataSharePolicyId", dataSharePolicyId);
+        ReflectionTestUtils.setField(digitalCardService, "dataSharePartnerId", dataSharePartnerId);
+        ReflectionTestUtils.setField(digitalCardService, "topic", topic);
+        ReflectionTestUtils.setField(digitalCardService, "digitalCardPassword", "name");
+        ReflectionTestUtils.setField(digitalCardService, "templateLang", "eng");
+
+        when(restClient.getForObject(dataShareUrl, String.class)).thenReturn(fetchedCredential);
+        when(encryptionUtil.decryptData(fetchedCredential)).thenReturn(decrypted);
+        when(credentialsVerifier.verifyCredentials(decrypted)).thenReturn(true);
+        when(pdfCardServiceImpl.generateCard(any(JSONObject.class), anyString(), anyString(), anyMap())).thenReturn(pdfBytes);
+        when(digitalCardTransactionRepository.findByRID(anyString())).thenReturn(null);
+        when(dataShareUtil.getDataShare(eq(pdfBytes), eq(dataSharePolicyId), eq(dataSharePartnerId)))
+                .thenReturn(new DataShareDto());
+
+        digitalCardService.generateDigitalCard("ignored", "type", dataShareUrl, eventId, transactionId, new HashMap<>());
+
+        verify(restClient).getForObject(eq(dataShareUrl), eq(String.class));
+        verify(credentialsVerifier).verifyCredentials(eq(decrypted));
+        verify(pdfCardServiceImpl).generateCard(any(JSONObject.class), anyString(), anyString(), anyMap());
+        verify(dataShareUtil).getDataShare(any(byte[].class), eq(dataSharePolicyId), eq(dataSharePartnerId));
+        verify(digitalCardTransactionRepository).save(any(DigitalCardTransactionEntity.class));
+        verify(webSubSubscriptionHelper).digitalCardStatusUpdateEvent(anyString(), any());
+    }
+
+    @Test
+    public void generateDigitalCard_VerificationEnabled_SucceedsOnVerified() throws Exception {
+        String credential = "encrypted";
+        String decrypted = "{ \"credentialSubject\": { \"id\": \"http://server/credentials/XYZ789\" } }";
+        String transactionId = UUID.randomUUID().toString();
+        String eventId = UUID.randomUUID().toString();
+        byte[] pdfBytes = new byte[]{1,2,3,4};
+
+        ReflectionTestUtils.setField(digitalCardService, "verifyCredentialsFlag", true);
+        ReflectionTestUtils.setField(digitalCardService, "isPasswordProtected", false);
+        ReflectionTestUtils.setField(digitalCardService, "dataSharePolicyId", "p");
+        ReflectionTestUtils.setField(digitalCardService, "dataSharePartnerId", "q");
+
+        when(encryptionUtil.decryptData(credential)).thenReturn(decrypted);
+        when(credentialsVerifier.verifyCredentials(decrypted)).thenReturn(true);
+        when(pdfCardServiceImpl.generateCard(any(JSONObject.class), anyString(), isNull(), anyMap())).thenReturn(pdfBytes);
+        when(digitalCardTransactionRepository.findByRID(anyString())).thenReturn(null);
+        when(dataShareUtil.getDataShare(eq(pdfBytes), anyString(), anyString())).thenReturn(new DataShareDto());
+
+        digitalCardService.generateDigitalCard(credential, "ctype", null, eventId, transactionId, new HashMap<>());
+
+        verify(credentialsVerifier).verifyCredentials(eq(decrypted));
+        verify(pdfCardServiceImpl).generateCard(any(JSONObject.class), anyString(), isNull(), anyMap());
+        verify(digitalCardTransactionRepository).save(any(DigitalCardTransactionEntity.class));
+    }
+
+    @Test
+    public void digitalCardStatusUpdate_ExistingTransaction_UpdatesInsteadOfCreate() throws Exception {
+        byte[] data = new byte[]{5,4,3,2};
+        String requestId = UUID.randomUUID().toString();
+        String rid = "RID-123";
+
+        ReflectionTestUtils.setField(digitalCardService, "dataSharePolicyId", "policy");
+        ReflectionTestUtils.setField(digitalCardService, "dataSharePartnerId", "partner");
+        ReflectionTestUtils.setField(digitalCardService, "topic", "TOPIC");
+
+        DataShareDto dto = new DataShareDto();
+        dto.setUrl("http://download/url");
+        when(dataShareUtil.getDataShare(eq(data), anyString(), anyString())).thenReturn(dto);
+
+        DigitalCardTransactionEntity existing = new DigitalCardTransactionEntity();
+        existing.setrid(rid);
+        when(digitalCardTransactionRepository.findByRID(rid)).thenReturn(existing);
+
+        ReflectionTestUtils.invokeMethod(digitalCardService, "digitalCardStatusUpdate", requestId, data, "ctype", rid);
+
+        verify(digitalCardTransactionRepository, never()).save(any(DigitalCardTransactionEntity.class));
+        verify(digitalCardTransactionRepository).updateTransactionDetails(eq(rid), eq("AVAILABLE"), eq(dto.getUrl()), any(LocalDateTime.class), anyString());
+        verify(webSubSubscriptionHelper).digitalCardStatusUpdateEvent(anyString(), any());
+    }
+
+    @Test
+    public void getDigitalCard_NoRecordAndInitiateDisabled_ThrowsNotCreated() {
+        ReflectionTestUtils.setField(digitalCardService, "isInitiateFlag", false);
+        when(digitalCardTransactionRepository.findByRID(rid)).thenReturn(null);
+
+        DigitalCardServiceException ex = assertThrows(DigitalCardServiceException.class, () -> digitalCardService.getDigitalCard(rid));
+        assertEquals(DigitalCardServiceErrorCodes.DATASHARE_EXCEPTION.getErrorCode(), ex.getErrorCode());
+    }
+
+    @Test
+    public void initiateCredentialRequest_WhenReqCredentialFails_ThrowsNotCreatedWithCode() {
+        String ridHash = "hash";
+        doThrow(new DigitalCardServiceException("cause")).when(credentialUtil).reqCredential(any(CredentialRequestDto.class));
+
+        DigitalCardServiceException ex = assertThrows(DigitalCardServiceException.class, () -> digitalCardService.initiateCredentialRequest(rid, ridHash));
+        assertEquals(DigitalCardServiceErrorCodes.DATASHARE_EXCEPTION.getErrorCode(), ex.getErrorCode());
     }
 
 }
