@@ -59,7 +59,7 @@ public class CredentialUtilTest {
     }
 
     @Test
-    public void reqCredentialTest_Success() throws ApisResourceAccessException {
+    public void reqCredentialTestSuccess() throws ApisResourceAccessException {
         RequestWrapper<CredentialRequestDto> requestDto = new RequestWrapper<>();
         CredentialRequestDto credentialRequestDto = new CredentialRequestDto();
         requestDto.setRequest(credentialRequestDto);
@@ -74,7 +74,7 @@ public class CredentialUtilTest {
 
     }
     @Test
-    public void getStatusTest_Success() {
+    public void getStatusTestSuccess() {
         List<String> pathSegments = new ArrayList<>();
         pathSegments.add(requestId);
 
@@ -88,7 +88,7 @@ public class CredentialUtilTest {
     }
 
     @Test
-    public void testReqCredential_Success() throws Exception {
+    public void testReqCredentialSuccess() throws Exception {
         CredentialRequestDto requestDto = new CredentialRequestDto();
         CredentialResponse expectedResponse = new CredentialResponse();
 
@@ -109,7 +109,7 @@ public class CredentialUtilTest {
     }
 
     @Test
-    public void testReqCredential_ApisResourceAccessException() throws Exception {
+    public void testReqCredentialApisResourceAccessException() throws Exception {
         CredentialRequestDto requestDto = new CredentialRequestDto();
 
         when(restClient.postApi(eq(ApiName.CREDENTIAL_REQ_URL), isNull(), any(), any(), eq(MediaType.APPLICATION_JSON), any(), eq(ResponseWrapper.class)))
@@ -121,7 +121,7 @@ public class CredentialUtilTest {
     }
 
     @Test
-    public void testReqCredential_IOException() throws Exception {
+    public void testReqCredentialIOException() throws Exception {
         CredentialRequestDto requestDto = new CredentialRequestDto();
         ResponseWrapper<CredentialResponse> responseWrapper = new ResponseWrapper<>();
         responseWrapper.setResponse(new CredentialResponse());

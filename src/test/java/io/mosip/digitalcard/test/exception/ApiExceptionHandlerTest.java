@@ -37,7 +37,7 @@ public class ApiExceptionHandlerTest {
     private ApiExceptionHandler apiExceptionHandler;
 
     @Test
-    public void controlDataNotFoundExceptionTest_Success()throws IOException {
+    public void controlDataNotFoundExceptionTestSuccess()throws IOException {
         ResponseEntity<ResponseWrapper<ServiceError>> actualControlDataServiceExceptionResult = apiExceptionHandler
                 .controlDataNotFoundException(null, new DataNotFoundException("DCS-408","PDF not found"));
         assertTrue(actualControlDataServiceExceptionResult.hasBody());
@@ -51,7 +51,7 @@ public class ApiExceptionHandlerTest {
     }
 
     @Test
-    public void controlDataNotFoundException_Success()throws IOException {
+    public void controlDataNotFoundExceptionSuccess()throws IOException {
         ResponseEntity<ResponseWrapper<ServiceError>> actualControlDataServiceExceptionResult = apiExceptionHandler
                 .controlDataNotFoundException(null, new DigitalCardServiceException("DCS-408","PDF not found"));
         assertTrue(actualControlDataServiceExceptionResult.hasBody());
@@ -65,7 +65,7 @@ public class ApiExceptionHandlerTest {
     }
 
     @Test
-    public void testOnAccessDeniedException_Success() throws IOException {
+    public void testOnAccessDeniedExceptionSuccess() throws IOException {
         HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
         AccessDeniedException accessDeniedException = new AccessDeniedException("Access denied");
         ResponseEntity<ResponseWrapper<ServiceError>> responseEntity = apiExceptionHandler.onAccessDeniedException(httpServletRequest, accessDeniedException);
@@ -82,7 +82,7 @@ public class ApiExceptionHandlerTest {
     }
 
     @Test
-    public void testOnAuthZException_Success() throws IOException {
+    public void testOnAuthZExceptionSuccess() throws IOException {
         HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
 
         List<ServiceError> serviceErrors = new ArrayList<>();
@@ -105,7 +105,7 @@ public class ApiExceptionHandlerTest {
     }
 
     @Test
-    public void testOnAuthNException_Success() throws IOException {
+    public void testOnAuthNExceptionSuccess() throws IOException {
         HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
         List<ServiceError> serviceErrors = new ArrayList<>();
         serviceErrors.add(new ServiceError(AuthAdapterErrorCode.UNAUTHORIZED.getErrorCode(),
@@ -127,7 +127,7 @@ public class ApiExceptionHandlerTest {
     }
 
     @Test
-    public void testDefaultErrorHandler_Success() throws IOException {
+    public void testDefaultErrorHandlerSuccess() throws IOException {
         HttpServletRequest httpServletRequest = mock(HttpServletRequest.class);
         Exception exception = new Exception("An unexpected error occurred");
         ResponseEntity<ResponseWrapper<ServiceError>> responseEntity = apiExceptionHandler.defaultErrorHandler(httpServletRequest, exception);

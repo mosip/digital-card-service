@@ -2,8 +2,10 @@ package io.mosip.digitalcard.test.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.mosip.biometrics.util.ConvertRequestDto;
+import io.mosip.biometrics.util.face.FaceDecoder;
 import io.mosip.digitalcard.constant.DigitalCardServiceErrorCodes;
 import io.mosip.digitalcard.dto.SignatureResponseDto;
+import io.mosip.digitalcard.dto.SimpleType;
 import io.mosip.digitalcard.exception.DataNotFoundException;
 import io.mosip.digitalcard.exception.DigitalCardServiceException;
 import io.mosip.digitalcard.exception.IdentityNotFoundException;
@@ -19,10 +21,14 @@ import io.mosip.kernel.core.pdfgenerator.spi.PDFGenerator;
 import io.mosip.kernel.core.qrcodegenerator.exception.QrcodeGenerationException;
 import io.mosip.kernel.core.qrcodegenerator.spi.QrCodeGenerator;
 import io.mosip.kernel.qrcode.generator.zxing.constant.QrVersion;
+import org.json.simple.JSONArray;
+import org.json.simple.JSONObject;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -39,11 +45,7 @@ import java.util.*;
 
 import org.json.simple.JSONObject;
 
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertThrows;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyMap;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.argThat;
@@ -91,7 +93,7 @@ public class PDFCardServiceImplTest {
 
 
     @Test
-    public void generateCardTest_Success() throws Exception {
+    public void generateCardTestSuccess() throws Exception {
         org.json.JSONObject decryptedCredentialJson = new org.json.JSONObject();
         decryptedCredentialJson.put("UIN", "testUIN");
         decryptedCredentialJson.put("biometrics", "sampleBiometricsData");
@@ -121,7 +123,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test(expected = DigitalCardServiceException.class)
-    public void generateCard_ShouldUseDefaultTemplateTypeWhenNotProvided() throws Exception {
+    public void generateCardShouldUseDefaultTemplateTypeWhenNotProvided() throws Exception {
         org.json.JSONObject decryptedCredentialJson = new org.json.JSONObject();
         decryptedCredentialJson.put("UIN", "1234567890");
         decryptedCredentialJson.put("isPhotoSet", false);
@@ -160,7 +162,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test
-    public void setQrCodeTest_Success() throws QrcodeGenerationException, IOException {
+    public void setQrCodeTestSuccess() throws QrcodeGenerationException, IOException {
         String qrString = "{\"biometrics\":\"sampleBiometricsData\", \"otherKey\":\"otherValue\"}";
         Map<String, Object> attributes = new HashMap<>();
         attributes.put("xyz","cdcs");
@@ -177,7 +179,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test
-    public void setQrCode_ShouldRemoveBiometricsWhenPhotoIsSet() throws Exception {
+    public void setQrCodeShouldRemoveBiometricsWhenPhotoIsSet() throws Exception {
         String qrString = "{\"biometrics\":\"bdata\", \"k\":\"v\"}";
         Map<String, Object> attributes = new HashMap<>();
         JSONObject qrJsonObj = new JSONObject();
@@ -199,7 +201,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test
-    public void generateUinCard_ShouldReturnNullOnSignatureServiceError() throws Exception {
+    public void generateUinCardShouldReturnNullOnSignatureServiceError() throws Exception {
         InputStream inputStream = new ByteArrayInputStream("pdf".getBytes());
         when(pdfGenerator.generate(any(InputStream.class))).thenReturn(new ByteArrayOutputStream());
         ResponseWrapper<SignatureResponseDto> responseWrapper = new ResponseWrapper<>();
@@ -215,7 +217,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test
-    public void generateCard_QrCodePathUsesTemplateAndSignature() throws Exception {
+    public void generateCardQrCodePathUsesTemplateAndSignature() throws Exception {
         org.json.JSONObject decryptedCredentialJson = new org.json.JSONObject();
         decryptedCredentialJson.put("UIN", "u");
         String credentialType = "qrcode";
@@ -254,7 +256,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test
-    public void generateCard_ShouldThrowWhenTemplateNullInPdfPath() throws Exception {
+    public void generateCardShouldThrowWhenTemplateNullInPdfPath() throws Exception {
         org.json.JSONObject decryptedCredentialJson = new org.json.JSONObject();
         decryptedCredentialJson.put("UIN", "u");
         String credentialType = "pdf";
@@ -289,7 +291,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test
-    public void testSetApplicantPhoto_NullInput() throws Exception {
+    public void testSetApplicantPhotoNullInput() throws Exception {
         String individualBio = null;
         Map<String, Object> attributes = new HashMap<>();
 
@@ -314,7 +316,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test
-    public void testSetTemplateAttributes_DemographicIdentityIsNull() {
+    public void testSetTemplateAttributesDemographicIdentityIsNull() {
         Map<String, Object> attribute = new HashMap<>();
         IdentityNotFoundException thrown = assertThrows(
                 IdentityNotFoundException.class,
@@ -325,7 +327,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test
-    public void generateUinCardTest_Success() throws IOException {
+    public void generateUinCardTestSuccess() throws IOException {
         InputStream in = new ByteArrayInputStream(new byte[]{1, 2, 3, 4});
         String password = "samplePassword";
         ByteArrayOutputStream out = new ByteArrayOutputStream();
@@ -347,7 +349,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test
-    public void testGenerateUinCard_Success() throws Exception {
+    public void testGenerateUinCardSuccess() throws Exception {
         InputStream inputStream = new ByteArrayInputStream("pdf content".getBytes());
         String password = "testPassword";
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
@@ -370,7 +372,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test
-    public void testSetApplicantPhoto_PhotoByteIsNull() {
+    public void testSetApplicantPhotoPhotoByteIsNull() {
         String individualBio = "mockBioData";
         Map<String, Object> attributes = new HashMap<>();
 
@@ -384,7 +386,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test
-    public void testSetApplicantPhoto_IndividualBioIsNull() {
+    public void testSetApplicantPhotoIndividualBioIsNull() {
         String individualBio = null;
         Map<String, Object> attributes = new HashMap<>();
 
@@ -395,7 +397,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test
-    public void testSetTemplateAttributes_IdentityNotFound() {
+    public void testSetTemplateAttributesIdentityNotFound() {
         org.json.JSONObject demographicIdentity = null;
         Map<String, Object> attributes = new HashMap<>();
 
@@ -406,7 +408,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test
-    public void setQrCode_ShouldNotRemoveBiometricsWhenPhotoNotSet() throws Exception {
+    public void setQrCodeShouldNotRemoveBiometricsWhenPhotoNotSet() throws Exception {
         String qrString = "{\"biometrics\":\"bdata\", \"k\":\"v\"}";
         Map<String, Object> attributes = new HashMap<>();
         JSONObject qrJsonObj = new JSONObject();
@@ -423,7 +425,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test
-    public void generateCard_ShouldUseTemplateTypeFromAdditionalAttributes() throws Exception {
+    public void generateCardShouldUseTemplateTypeFromAdditionalAttributes() throws Exception {
         org.json.JSONObject decrypted = new org.json.JSONObject();
         decrypted.put("UIN", "u");
         String credentialType = "qrcode";
@@ -466,7 +468,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test
-    public void setQrCode_ShouldReturnFalseAndNotSetAttributeWhenGeneratorReturnsNull() throws Exception {
+    public void setQrCodeShouldReturnFalseAndNotSetAttributeWhenGeneratorReturnsNull() throws Exception {
         String qrString = "{\"k\":\"v\"}";
         Map<String, Object> attributes = new HashMap<>();
         JSONObject qrJsonObj = new JSONObject();
@@ -480,7 +482,7 @@ public class PDFCardServiceImplTest {
     }
 
     @Test
-    public void generateUinCard_ShouldReturnDecodedSignatureBytesOnSuccess() throws Exception {
+    public void generateUinCardShouldReturnDecodedSignatureBytesOnSuccess() throws Exception {
         InputStream inputStream = new ByteArrayInputStream("pdf".getBytes());
         when(pdfGenerator.generate(any(InputStream.class))).thenReturn(new ByteArrayOutputStream());
 
@@ -506,6 +508,27 @@ public class PDFCardServiceImplTest {
         byte[] res = ReflectionTestUtils.invokeMethod(pdfCardService, "generateUinCard", inputStream, "pwd");
         assertNotNull(res);
         assertEquals(payload, new String(res));
+    }
+
+    @Test
+    public void testSetTemplateAttributesDemographicIdentityNullThrowsIdentityNotFound() {
+        Map<String, Object> attribute = new HashMap<>();
+        IdentityNotFoundException thrown = org.junit.Assert.assertThrows(
+                IdentityNotFoundException.class,
+                () -> ReflectionTestUtils.invokeMethod(pdfCardService, "setTemplateAttributes", null, attribute)
+        );
+
+        assertEquals("DCS-022 --> Unable to Find Identity Field in ID JSON", thrown.getMessage());
+    }
+
+    @Test
+    public void whenIndividualBioIsNullThenReturnsFalseAndDoesNotSetAttribute() {
+        Map<String, Object> attributes = new HashMap<>();
+
+        boolean result = Boolean.TRUE.equals(ReflectionTestUtils.invokeMethod(pdfCardService, "setApplicantPhoto", null, attributes));
+
+        assertFalse(result);
+        assertFalse(attributes.containsKey("ApplicantPhoto"));
     }
 
 }

@@ -33,7 +33,7 @@ public class DigitalCardInitializerTest {
     private ThreadPoolTaskScheduler taskScheduler;
 
     @Test
-    public void onApplicationEvent_withPositiveDelay_schedulesAtFixedRate() {
+    public void onApplicationEventWithPositiveDelaySchedulesAtFixedRate() {
         int delaySecs = 10;
         ReflectionTestUtils.setField(digitalCardInitializer, "reSubscriptionDelaySecs", delaySecs);
 
@@ -51,7 +51,7 @@ public class DigitalCardInitializerTest {
     }
 
     @Test
-    public void onApplicationEvent_withNonPositiveDelay_doesNotSchedule() {
+    public void onApplicationEventWithNonPositiveDelayDoesNotSchedule() {
         ReflectionTestUtils.setField(digitalCardInitializer, "reSubscriptionDelaySecs", 0);
 
         digitalCardInitializer.onApplicationEvent(mock(ApplicationReadyEvent.class));
@@ -60,7 +60,7 @@ public class DigitalCardInitializerTest {
     }
 
     @Test
-    public void initSubscriptions_success_callsHelperForAllTopics() {
+    public void initSubscriptionsSuccessCallsHelperForAllTopics() {
         ReflectionTestUtils.setField(digitalCardInitializer, "credentialTopic", "cred-topic");
         ReflectionTestUtils.setField(digitalCardInitializer, "identityCreateTopic", "create-topic");
         ReflectionTestUtils.setField(digitalCardInitializer, "identityUpdateTopic", "update-topic");
@@ -77,7 +77,7 @@ public class DigitalCardInitializerTest {
     }
 
     @Test
-    public void initSubscriptions_whenHelperThrows_returnsFalse() {
+    public void initSubscriptionsWhenHelperThrowsReturnsFalse() {
         ReflectionTestUtils.setField(digitalCardInitializer, "credentialTopic", "t1");
         ReflectionTestUtils.setField(digitalCardInitializer, "credentialCallBackUrl", "cb1");
 
@@ -90,7 +90,7 @@ public class DigitalCardInitializerTest {
     }
 
     @Test
-    public void retrySubscriptions_retriesUntilSuccess_thenStops() {
+    public void retrySubscriptionsRetriesUntilSuccessThenStops() {
         ReflectionTestUtils.setField(digitalCardInitializer, "retryCount", 5);
         ReflectionTestUtils.setField(digitalCardInitializer, "credentialTopic", "t1");
         ReflectionTestUtils.setField(digitalCardInitializer, "identityCreateTopic", "t2");
@@ -113,7 +113,7 @@ public class DigitalCardInitializerTest {
     }
 
     @Test
-    public void retrySubscriptions_whenAlwaysFail_doesAtMostRetryCountPlusOneAttempts() {
+    public void retrySubscriptionsWhenAlwaysFailDoesAtMostRetryCountPlusOneAttempts() {
         ReflectionTestUtils.setField(digitalCardInitializer, "retryCount", 2); // should attempt 3 times total
         ReflectionTestUtils.setField(digitalCardInitializer, "credentialTopic", "t1");
         ReflectionTestUtils.setField(digitalCardInitializer, "credentialCallBackUrl", "c1");

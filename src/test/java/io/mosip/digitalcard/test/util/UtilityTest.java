@@ -58,7 +58,7 @@ public class UtilityTest {
     }
 
     @Test
-    public void testGetIdentityMappingJson_WhenBlank_ShouldFetchFromService() throws Exception {
+    public void testGetIdentityMappingJsonWhenBlankShouldFetchFromService() throws Exception {
         when(restClient.getForObject(configServerFileStorageURL + identityJson, String.class))
                 .thenReturn(expectedJsonResponse);
         String actualJsonResponse = utility.getIdentityMappingJson(configServerFileStorageURL, identityJson);
@@ -68,12 +68,12 @@ public class UtilityTest {
     }
 
     @Test
-    public void testGetMappingJsonObject_WhenBlank_ShouldFetchAndParseJson() throws Exception {
+    public void testGetMappingJsonObjectWhenBlank_ShouldFetchAndParseJson() throws Exception {
         JSONObject actualJsonObject = utility.getMappingJsonObject();
     }
 
     @Test
-    public void testGetJSONObject_WhenKeyIsPresentAndValueIsLinkedHashMap_ShouldReturnJsonObject() {
+    public void testGetJSONObjectWhenKeyIsPresentAndValueIsLinkedHashMapShouldReturnJsonObject() {
         LinkedHashMap<String, String> linkedHashMap = new LinkedHashMap<>();
         linkedHashMap.put("key1", "value1");
         JSONObject jsonObject = new JSONObject();
@@ -110,7 +110,7 @@ public class UtilityTest {
     }
 
     @Test
-    public void testGetJSONArray_WhenKeyExistsAndValueIsNull_ShouldReturnNull() {
+    public void testGetJSONArrayWhenKeyExistsAndValueIsNullShouldReturnNull() {
         JSONObject jsonObject = new JSONObject();
         jsonObject.put("key3", null);
 
@@ -118,7 +118,7 @@ public class UtilityTest {
     }
 
     @Test
-    public void testReadValue_whenJavaLangString_Success() throws IOException {
+    public void testReadValueWhenJavaLangStringSuccess() throws IOException {
         Utility utility = new Utility();
         utility.setObjectMapper(JsonMapper.builder().findAndAddModules().build());
         Class<String> clazz = String.class;
@@ -127,28 +127,28 @@ public class UtilityTest {
     }
     
     @Test
-    public void testGetUser_WhenSecurityContextIsNull() {
+    public void testGetUserWhenSecurityContextIsNull() {
         SecurityContextHolder.clearContext();
         String username = Utility.getUser();
         assertEquals("", username);
     }
 
     @Test
-    public void testGetUser_WhenAuthenticationIsNull() {
+    public void testGetUserWhenAuthenticationIsNull() {
         SecurityContextHolder.getContext().setAuthentication(null);
         String username = Utility.getUser();
         assertEquals("", username);
     }
 
     @Test
-    public void testGetUser_WhenPrincipalIsNotUserDetails() {
+    public void testGetUserWhenPrincipalIsNotUserDetails() {
         SecurityContextHolder.getContext().setAuthentication(new UsernamePasswordAuthenticationToken("testuser", "password"));
         String username = Utility.getUser();
         assertEquals("", username);
     }
 
     @Test
-    public void testGetUser_WhenUserDetailsIsPresent() {
+    public void testGetUserWhenUserDetailsIsPresent() {
         UserDetails userDetails = User.builder().username("testuser").password("password").roles("USER").build();
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
         SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -157,7 +157,7 @@ public class UtilityTest {
     }
 
     @Test
-    public void testGetJSONObjectFromArray_givenJSONObject_whenJSONArrayAddJSONObject() {
+    public void testGetJSONObjectFromArrayGivenJSONObjectWhenJSONArrayAddJSONObject() {
         JSONArray jsonObject = new JSONArray();
         jsonObject.add("12");
         jsonObject.add(new JSONObject());
@@ -166,7 +166,7 @@ public class UtilityTest {
     }
 
     @Test
-    public void testGetJSONObjectFromArray_givenLinkedHashMap_whenJSONArrayAddLinkedHashMap() {
+    public void testGetJSONObjectFromArrayGivenLinkedHashMapWhenJSONArrayAddLinkedHashMap() {
         JSONArray jsonObject = new JSONArray();
         jsonObject.add("12");
         jsonObject.add(new LinkedHashMap<>());
@@ -175,14 +175,14 @@ public class UtilityTest {
     }
 
     @Test
-    public void testMapJsonNodeToJavaObject_whenJavaLangObject_thenReturnArrayLengthIsZero() {
+    public void testMapJsonNodeToJavaObjectWhenJavaLangObjectThenReturnArrayLengthIsZero() {
         Class<Object> genericType = Object.class;
 
         assertEquals(0, Utility.mapJsonNodeToJavaObject(genericType, new JSONArray()).length);
     }
 
     @Test
-    public void testMapJsonNodeToJavaObject_EmptyJSONArray() {
+    public void testMapJsonNodeToJavaObjectEmptyJSONArray() {
         JSONArray demographicJsonNode = new JSONArray();
 
         LanguageValue[] result = Utility.mapJsonNodeToJavaObject(LanguageValue.class, demographicJsonNode);
@@ -191,9 +191,85 @@ public class UtilityTest {
     }
 
     @Test
-    public void testMapJsonNodeToJavaObject_NullJSONArray() {
+    public void testMapJsonNodeToJavaObjectNullJSONArray() {
         assertThrows(NullPointerException.class, () ->
                 Utility.mapJsonNodeToJavaObject(LanguageValue.class, null));
+    }
+
+    @Test
+    public void testMapJsonNodeToJavaObjectValidJSONArray() {
+        JSONArray demographicJsonNode = new JSONArray();
+        JSONObject obj1 = new JSONObject();
+        obj1.put("language", "en");
+        obj1.put("value", "English");
+        JSONObject obj2 = new JSONObject();
+        obj2.put("language", "fr");
+        obj2.put("value", "French");
+        demographicJsonNode.add(obj1);
+        demographicJsonNode.add(obj2);
+
+        LanguageValue[] result = Utility.mapJsonNodeToJavaObject(LanguageValue.class, demographicJsonNode);
+
+        assertEquals(2, result.length);
+        assertEquals("en", result[0].language);
+        assertEquals("English", result[0].value);
+        assertEquals("fr", result[1].language);
+        assertEquals("French", result[1].value);
+    }
+
+    @Test
+    public void testMapJsonNodeToJavaObjectWithNullElements() {
+        JSONArray demographicJsonNode = new JSONArray();
+        JSONObject obj1 = new JSONObject();
+        obj1.put("language", "en");
+        obj1.put("value", "English");
+        demographicJsonNode.add(obj1);
+        demographicJsonNode.add(null);
+
+        LanguageValue[] result = Utility.mapJsonNodeToJavaObject(LanguageValue.class, demographicJsonNode);
+
+        assertEquals(2, result.length);
+        assertEquals("en", result[0].language);
+        assertEquals("English", result[0].value);
+        assertEquals(null, result[1]);
+    }
+
+    @Test
+    public void testMapJsonNodeToJavaObjectMissingKeys() {
+        JSONArray demographicJsonNode = new JSONArray();
+        JSONObject obj1 = new JSONObject();
+        obj1.put("language", "en");
+        demographicJsonNode.add(obj1);
+
+        LanguageValue[] result = Utility.mapJsonNodeToJavaObject(LanguageValue.class, demographicJsonNode);
+
+        assertEquals(1, result.length);
+        assertEquals("en", result[0].language);
+        assertEquals(null, result[0].value);
+    }
+
+    @Test
+    public void testMapJsonNodeToJavaObjectNoSuchFieldException() {
+        JSONArray demographicJsonNode = new JSONArray();
+        JSONObject obj1 = new JSONObject();
+        obj1.put("language", "en");
+        obj1.put("value", "English");
+        demographicJsonNode.add(obj1);
+
+        assertThrows(io.mosip.digitalcard.exception.DigitalCardServiceException.class, () ->
+                Utility.mapJsonNodeToJavaObject(InvalidClass.class, demographicJsonNode));
+    }
+
+    @Test
+    public void testMapJsonNodeToJavaObjectInstantiationException() {
+        JSONArray demographicJsonNode = new JSONArray();
+        JSONObject obj1 = new JSONObject();
+        obj1.put("language", "en");
+        obj1.put("value", "English");
+        demographicJsonNode.add(obj1);
+
+        assertThrows(io.mosip.digitalcard.exception.DigitalCardServiceException.class, () ->
+                Utility.mapJsonNodeToJavaObject(AbstractClass.class, demographicJsonNode));
     }
 
     public static class LanguageValue {
@@ -203,6 +279,25 @@ public class UtilityTest {
         public LanguageValue(String language, String value) {
             this.language = language;
             this.value = value;
+        }
+
+        public LanguageValue() {
+            // Default constructor for reflection
+        }
+    }
+
+    public static class InvalidClass {
+        private String invalidField;
+
+        public InvalidClass() {
+        }
+    }
+
+    public static abstract class AbstractClass {
+        private String language;
+        private String value;
+
+        public AbstractClass() {
         }
     }
 

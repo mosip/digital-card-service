@@ -40,7 +40,7 @@ public class TemplateGeneratorTest {
     private static final String CARD_TEMPLATE = "cardTemplate";
 
     @Test
-    public void testGetTemplate_Success() throws Exception {
+    public void testGetTemplateSuccess() throws Exception {
         String cardTemplate= "templateCard";
         Map<String, Object> attributes = new HashMap<>();
 
@@ -53,7 +53,7 @@ public class TemplateGeneratorTest {
     }
 
     @Test
-    public void testGetTemplate_TemplateResourceNotFoundException() throws Exception {
+    public void testGetTemplateTemplateResourceNotFoundException() throws Exception {
         String langCode = "eng";
         Map<String, Object> attributes = new HashMap<>();
         when(environment.getProperty(CARD_TEMPLATE)).thenReturn(null);
@@ -63,7 +63,7 @@ public class TemplateGeneratorTest {
     }
 
     @Test
-    public void testGetTemplateManager_Success() {
+    public void testGetTemplateManagerSuccess() {
         TemplateManager templateManager = templateGenerator.getTemplateManager();
 
         assertNotNull(templateManager);

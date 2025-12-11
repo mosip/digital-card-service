@@ -29,7 +29,7 @@ public class SubscribeEventTest {
     private WebSubSubscriptionHelper webSubSubscriptionHelper;
 
     @Test
-    public void onApplicationEvent_schedulesWithConfiguredDelay() {
+    public void onApplicationEventSchedulesWithConfiguredDelay() {
         int delayMs = 1000;
         ReflectionTestUtils.setField(subscribeEvent, "taskSubsctiptionDelay", delayMs);
 
@@ -51,7 +51,7 @@ public class SubscribeEventTest {
     }
 
     @Test
-    public void scheduledRunnable_executesAllSubscriptions_inOrder() {
+    public void scheduledRunnableExecutesAllSubscriptionsInOrder() {
         ReflectionTestUtils.setField(subscribeEvent, "taskSubsctiptionDelay", 10);
         ReflectionTestUtils.setField(subscribeEvent, "credentialTopic", "cred-topic");
         ReflectionTestUtils.setField(subscribeEvent, "identityCreateTopic", "create-topic");
@@ -79,7 +79,7 @@ public class SubscribeEventTest {
     }
 
     @Test
-    public void scheduledRunnable_stopsOnException_doesNotCallRemainingSubscriptions() {
+    public void scheduledRunnable_stopsOnExceptionDoesNotCallRemainingSubscriptions() {
         ReflectionTestUtils.setField(subscribeEvent, "taskSubsctiptionDelay", 10);
         ReflectionTestUtils.setField(subscribeEvent, "credentialTopic", "cred-topic");
         ReflectionTestUtils.setField(subscribeEvent, "identityCreateTopic", "create-topic");
@@ -111,7 +111,7 @@ public class SubscribeEventTest {
     }
 
     @Test
-    public void onApplicationEvent_withNegativeDelay_stillSchedulesRunnable() {
+    public void onApplicationEventWithNegativeDelayStillSchedulesRunnable() {
         int delayMs = -1000;
         ReflectionTestUtils.setField(subscribeEvent, "taskSubsctiptionDelay", delayMs);
 
@@ -125,7 +125,7 @@ public class SubscribeEventTest {
     }
 
     @Test
-    public void onApplicationEvent_calledMultipleTimes_schedulesMultipleTasks() {
+    public void onApplicationEventCalledMultipleTimesSchedulesMultipleTasks() {
         ReflectionTestUtils.setField(subscribeEvent, "taskSubsctiptionDelay", 1);
 
         subscribeEvent.onApplicationEvent(mock(ApplicationReadyEvent.class));

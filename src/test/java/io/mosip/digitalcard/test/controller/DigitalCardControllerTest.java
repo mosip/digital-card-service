@@ -52,7 +52,7 @@ public class DigitalCardControllerTest {
     }
 
     @Test
-    public void testHandleIdentityUpdateEvent_Success() {
+    public void testHandleIdentityUpdateEventSuccess() {
         EventModel eventModel = getEventModel();
         doNothing().when(digitalCardService).initiateCredentialRequest(anyString(), anyString());
         ResponseEntity<?> responseEntity = digitalCardController.handleIdentityUpdateEvent(eventModel);
@@ -60,7 +60,7 @@ public class DigitalCardControllerTest {
     }
 
     @Test
-    public void testHandleIdentityUpdateEvent_Exception() {
+    public void testHandleIdentityUpdateEventException() {
         EventModel eventModel = getEventModel();
         ResponseEntity<?> responseEntity = digitalCardController.handleIdentityUpdateEvent(eventModel);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
@@ -90,7 +90,7 @@ public class DigitalCardControllerTest {
     }
 
     @Test
-    public void getDigitalCardTest_Success(){
+    public void getDigitalCardTestSuccess(){
         String rid = "123456";
         DigitalCardStatusResponseDto digitalCardStatusResponseDto = new DigitalCardStatusResponseDto();
         digitalCardStatusResponseDto.setStatusCode("123");
@@ -104,7 +104,7 @@ public class DigitalCardControllerTest {
     }
 
     @Test
-    public void credentialEventTest_Success() {
+    public void credentialEventTestSuccess() {
         when(environment.getProperty("javax.persistence.jdbc.user")).thenReturn("testUser");
         EventModel eventModel = getEventModel();
         lenient().doNothing().when(digitalCardService).initiateCredentialRequest(anyString(), anyString());
@@ -113,7 +113,7 @@ public class DigitalCardControllerTest {
     }
 
     @Test
-    public void credentialEvent_RuntimeException_returnSuccess() {
+    public void credentialEventRuntimeExceptionReturnSuccess() {
         when(environment.getProperty("javax.persistence.jdbc.user")).thenReturn("testUser");
         EventModel eventModel = getEventModel();
         lenient().doThrow(new RuntimeException("Mock Exception")).when(digitalCardService).initiateCredentialRequest(anyString(), anyString());

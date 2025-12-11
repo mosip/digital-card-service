@@ -51,7 +51,7 @@ public class WebSubSubscriptionHelperTest {
     }
 
     @Test
-    public void testInitSubscriptions_subscribeCalledWithCorrectRequest() {
+    public void testInitSubscriptionsSubscribeCalledWithCorrectRequest() {
         String topic = "topic-1";
         String callback = "http://callback.example/path";
 
@@ -69,7 +69,7 @@ public class WebSubSubscriptionHelperTest {
     }
 
     @Test
-    public void testInitSubscriptions_subscribeThrowsException_isHandled() {
+    public void testInitSubscriptionsSubscribeThrowsExceptionIsHandled() {
 
         helper.initSubscriptions("topic-2", "http://callback.example/2");
 
@@ -77,13 +77,12 @@ public class WebSubSubscriptionHelperTest {
     }
 
     @Test
-    public void testDigitalCardStatusUpdateEvent_publishCalledWithCorrectArgs() {
+    public void testDigitalCardStatusUpdateEventPublishCalledWithCorrectArgs() {
         String topic = "publish-topic";
         CredentialStatusEvent event = mock(CredentialStatusEvent.class);
 
         helper.digitalCardStatusUpdateEvent(topic, event);
 
-        @SuppressWarnings("unchecked")
         ArgumentCaptor<HttpHeaders> headersCaptor = ArgumentCaptor.forClass(HttpHeaders.class);
 
         verify(pb, times(1)).publishUpdate(eq(topic), eq(event), eq(MediaType.APPLICATION_JSON_UTF8_VALUE), headersCaptor.capture(), eq("https://hub.example"));
@@ -93,10 +92,11 @@ public class WebSubSubscriptionHelperTest {
     }
 
     @Test
-    public void testDigitalCardStatusUpdateEvent_publishThrowsException_isHandled() {
+    public void testDigitalCardStatusUpdateEventPublishThrowsExceptionIsHandled() {
 
         helper.digitalCardStatusUpdateEvent("publish-topic-2", mock(CredentialStatusEvent.class));
 
         verify(pb, times(1)).publishUpdate(anyString(), any(CredentialStatusEvent.class), anyString(), any(HttpHeaders.class), anyString());
     }
+
 }

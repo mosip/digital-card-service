@@ -23,7 +23,7 @@ public class SchedulingConfigureConfigurationTest {
     private ScheduledTaskRegistrar taskRegistrar;
 
     @Test
-    public void testConfigureTasks_Success() {
+    public void testConfigureTasksSuccess() {
         schedulingConfigurerConfiguration.configureTasks(taskRegistrar);
 
         verify(taskRegistrar, times(1)).setTaskScheduler(any(ThreadPoolTaskScheduler.class));
