@@ -21,7 +21,7 @@ if [ "$flag" = "n" ]; then
 fi
 
 NS=digitalcard
-CHART_VERSION=1.3.0-beta.1-develop
+CHART_VERSION=1.3.0
 
 echo Create $NS namespace
 kubectl create ns $NS
