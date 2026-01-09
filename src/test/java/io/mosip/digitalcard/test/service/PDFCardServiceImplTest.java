@@ -2,10 +2,8 @@ package io.mosip.digitalcard.test.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.mosip.biometrics.util.ConvertRequestDto;
-import io.mosip.biometrics.util.face.FaceDecoder;
 import io.mosip.digitalcard.constant.DigitalCardServiceErrorCodes;
 import io.mosip.digitalcard.dto.SignatureResponseDto;
-import io.mosip.digitalcard.dto.SimpleType;
 import io.mosip.digitalcard.exception.DataNotFoundException;
 import io.mosip.digitalcard.exception.DigitalCardServiceException;
 import io.mosip.digitalcard.exception.IdentityNotFoundException;
@@ -24,11 +22,12 @@ import io.mosip.kernel.qrcode.generator.zxing.constant.QrVersion;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
+import org.mockito.MockitoAnnotations;
 import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -42,8 +41,6 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.*;
-
-import org.json.simple.JSONObject;
 
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.anyMap;
@@ -91,6 +88,13 @@ public class PDFCardServiceImplTest {
     @Mock
     CbeffUtil cbeffutil;
 
+
+    @Before
+    public void setup() {
+        MockitoAnnotations.openMocks(this);
+        ReflectionTestUtils.setField(pdfCardService, "supportedLang", "en,fr");
+        ReflectionTestUtils.setField(pdfCardService, "objectMapper", objectMapper);
+    }
 
     @Test
     public void generateCardTestSuccess() throws Exception {
@@ -530,5 +534,61 @@ public class PDFCardServiceImplTest {
         assertFalse(result);
         assertFalse(attributes.containsKey("ApplicantPhoto"));
     }
+
+    private JSONObject createMapperIdentity() {
+        JSONObject mapperIdentity = new JSONObject();
+        mapperIdentity.put("fullName", new LinkedHashMap<>() {{ put("value", "name"); }});
+        mapperIdentity.put("gender", new LinkedHashMap<>() {{ put("value", "gender"); }});
+        mapperIdentity.put("dateOfBirth", new LinkedHashMap<>() {{ put("value", "dob"); }});
+        mapperIdentity.put("address", new LinkedHashMap<>() {{ put("value", "address"); }});
+        return mapperIdentity;
+    }
+
+    @Test
+    public void testSetTemplateAttributesNullIdentity() {
+        Map<String, Object> attributes = new HashMap<>();
+
+        assertThrows(Exception.class, () -> {
+            ReflectionTestUtils.invokeMethod(pdfCardService, "setTemplateAttributes", null, attributes);
+        });
+    }
+
+    @Test
+    public void testSetTemplateAttributesSuccess() throws Exception {
+        org.json.JSONObject demographicIdentity = new org.json.JSONObject();
+        demographicIdentity.put("name", "John Doe");
+        demographicIdentity.put("dob", "1990-01-01");
+        demographicIdentity.put("gender", new JSONArray() {{
+            add(new JSONObject() {{ put("language", "en"); put("value", "Male"); }});
+            add(new JSONObject() {{ put("language", "fr"); put("value", "Homme"); }});
+            add(new JSONObject() {{ put("language", "es"); put("value", "Masculino"); }});
+        }});
+        demographicIdentity.put("address", new JSONObject() {{ put("value", "123 Main St"); }});
+
+
+        JSONObject mapperIdentity = createMapperIdentity();
+
+        when(utility.getIdentityMappingJson(any(), any())).thenReturn("{}");
+        when(utility.getDemographicIdentity()).thenReturn("demographicIdentity");
+        when(utility.getJSONObject(any(), anyString())).thenReturn(mapperIdentity);
+
+        when(utility.getJSONValue(mapperIdentity, "fullName")).thenReturn(new LinkedHashMap<>() {{ put("value", "name"); }});
+        when(utility.getJSONValue(mapperIdentity, "gender")).thenReturn(new LinkedHashMap<>() {{ put("value", "gender"); }});
+        when(utility.getJSONValue(mapperIdentity, "dateOfBirth")).thenReturn(new LinkedHashMap<>() {{ put("value", "dob"); }});
+        when(utility.getJSONValue(mapperIdentity, "address")).thenReturn(new LinkedHashMap<>() {{ put("value", "address"); }});
+
+
+        Map<String, Object> attributes = new HashMap<>();
+
+        ReflectionTestUtils.invokeMethod(pdfCardService, "setTemplateAttributes", demographicIdentity, attributes);
+
+        assertEquals("John Doe", attributes.get("name"));
+        assertEquals("1990-01-01", attributes.get("dob"));
+        assertEquals("Male", attributes.get("gender_en"));
+        assertEquals("Homme", attributes.get("gender_fr"));
+        assertNull(attributes.get("gender_es"));
+        assertEquals("123 Main St", attributes.get("address"));
+    }
+
 
 }
