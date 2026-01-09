@@ -28,6 +28,9 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.anyMap;
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 
 @SpringBootTest(classes = DigitalCardServiceTest.class)
@@ -119,6 +122,47 @@ public class DigitalCardControllerTest {
         lenient().doThrow(new RuntimeException("Mock Exception")).when(digitalCardService).initiateCredentialRequest(anyString(), anyString());
         ResponseEntity<?> responseEntity = digitalCardController.credentialEvent(eventModel);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void handleIdentityCreateEventWhenServiceThrowsShouldReturnOk() {
+        EventModel eventModel = getEventModel();
+        doThrow(new RuntimeException("service failure")).when(digitalCardService)
+                .initiateCredentialRequest(anyString(), anyString());
+
+        ResponseEntity<?> response = digitalCardController.handleIdentityCreateEvent(eventModel);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void handleIdentityUpdateEventWhenServiceThrowsShouldReturnOk() {
+        EventModel eventModel = getEventModel();
+        doThrow(new RuntimeException("service failure")).when(digitalCardService)
+                .initiateCredentialRequest(anyString(), anyString());
+
+        ResponseEntity<?> response = digitalCardController.handleIdentityUpdateEvent(eventModel);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void credentialEventWhenGenerateThrowsShouldReturnOkAndReadEnvProperty() {
+        when(environment.getProperty("javax.persistence.jdbc.user")).thenReturn("testUser");
+        EventModel eventModel = getEventModel();
+        lenient().doThrow(new RuntimeException("generation failure")).when(digitalCardService)
+                .generateDigitalCard(
+                        org.mockito.ArgumentMatchers.anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyString(),
+                        anyMap()
+                );
+        ResponseEntity<?> response = digitalCardController.credentialEvent(eventModel);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        verify(environment).getProperty("javax.persistence.jdbc.user");
     }
 
 }

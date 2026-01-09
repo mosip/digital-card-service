@@ -7,6 +7,7 @@ import java.lang.reflect.Field;
 
 import io.mosip.digitalcard.websub.CredentialStatusEvent;
 import io.mosip.digitalcard.websub.WebSubSubscriptionHelper;
+import io.mosip.kernel.websub.api.exception.WebSubClientException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -21,6 +22,7 @@ import io.mosip.kernel.core.websub.spi.SubscriptionClient;
 import io.mosip.kernel.websub.api.model.SubscriptionChangeRequest;
 import io.mosip.kernel.websub.api.model.SubscriptionChangeResponse;
 import io.mosip.kernel.websub.api.model.UnsubscriptionRequest;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @RunWith(MockitoJUnitRunner.class)
 public class WebSubSubscriptionHelperTest {
@@ -99,4 +101,44 @@ public class WebSubSubscriptionHelperTest {
         verify(pb, times(1)).publishUpdate(anyString(), any(CredentialStatusEvent.class), anyString(), any(HttpHeaders.class), anyString());
     }
 
+    @Test
+    public void initSubscriptionsWhenWebSubClientExceptionShouldCatchException() {
+        ReflectionTestUtils.setField(helper, "webSubHubUrl", "http://hub");
+        ReflectionTestUtils.setField(helper, "webSubSecret", "secret");
+
+        doThrow(new WebSubClientException("subscribe failed", null))
+                .when(sb)
+                .subscribe(any(SubscriptionChangeRequest.class));
+
+        helper.initSubscriptions("topic-1", "http://callback");
+
+        verify(sb).subscribe(any(SubscriptionChangeRequest.class));
+    }
+
+    @Test
+    public void digitalCardStatusUpdateEventWhenWebSubClientExceptionShouldCatchException() {
+        ReflectionTestUtils.setField(helper, "webSubHubUrl", "http://hub");
+
+        CredentialStatusEvent event = new CredentialStatusEvent();
+
+        doThrow(new WebSubClientException("publish failed", null))
+                .when(pb)
+                .publishUpdate(
+                        anyString(),
+                        any(CredentialStatusEvent.class),
+                        anyString(),
+                        any(HttpHeaders.class),
+                        anyString()
+                );
+
+        helper.digitalCardStatusUpdateEvent("topic-1", event);
+
+        verify(pb).publishUpdate(
+                anyString(),
+                any(CredentialStatusEvent.class),
+                anyString(),
+                any(HttpHeaders.class),
+                anyString()
+        );
+    }
 }

@@ -8,6 +8,7 @@ import io.mosip.digitalcard.dto.CredentialResponse;
 import io.mosip.digitalcard.dto.CredentialRequestDto;
 import io.mosip.digitalcard.dto.DataShareDto;
 import io.mosip.digitalcard.entity.DigitalCardTransactionEntity;
+import io.mosip.digitalcard.exception.DataNotFoundException;
 import io.mosip.digitalcard.exception.DigitalCardServiceException;
 import io.mosip.digitalcard.repositories.DigitalCardTransactionRepository;
 import io.mosip.digitalcard.service.CardGeneratorService;
@@ -15,8 +16,11 @@ import io.mosip.digitalcard.service.impl.DigitalCardServiceImpl;
 import io.mosip.digitalcard.test.DigitalCardServiceTest;
 import io.mosip.digitalcard.util.*;
 import io.mosip.digitalcard.websub.WebSubSubscriptionHelper;
+import io.mosip.kernel.core.dataaccess.exception.DataAccessLayerException;
+import io.mosip.kernel.core.pdfgenerator.exception.PDFGeneratorException;
 import io.mosip.vercred.CredentialsVerifier;
 import io.mosip.kernel.core.logger.spi.Logger;
+import org.json.simple.JSONArray;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -37,6 +41,7 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.*;
 
+import org.springframework.dao.DataAccessException;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @SpringBootTest(classes = DigitalCardServiceTest.class)
@@ -454,6 +459,140 @@ public class DigitalCardServiceImplTest {
 
         DigitalCardServiceException ex = assertThrows(DigitalCardServiceException.class, () -> digitalCardService.initiateCredentialRequest(rid, ridHash));
         assertEquals(DigitalCardServiceErrorCodes.DATASHARE_EXCEPTION.getErrorCode(), ex.getErrorCode());
+    }
+
+    @Test
+    public void getDigitalCardWhenDataNotFoundExceptionThrownShouldThrowDigitalCardServiceException() {
+        String rid = "RID-EX1";
+        try {
+            when(digitalCardTransactionRepository.findByRID(rid)).thenThrow(new DataNotFoundException("ERR_CODE","not found"));
+        } catch (Exception e) {
+            fail("Mock setup failed: " + e.getMessage());
+        }
+
+        DigitalCardServiceException ex = assertThrows(DigitalCardServiceException.class,
+                () -> digitalCardService.getDigitalCard(rid));
+
+        assertTrue(ex.getMessage().contains(DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorMessage()));
+    }
+
+    @Test
+    public void getDigitalCardWhenSpringDataAccessExceptionThrownShouldThrowDigitalCardServiceException() {
+        String rid = "RID-EX2";
+        try {
+            when(digitalCardTransactionRepository.findByRID(rid)).thenThrow(new DataAccessException("db error") {});
+        } catch (Exception e) {
+            fail("Mock setup failed: " + e.getMessage());
+        }
+
+        DigitalCardServiceException ex = assertThrows(DigitalCardServiceException.class,
+                () -> digitalCardService.getDigitalCard(rid));
+
+        assertTrue(ex.getMessage().contains(DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorMessage()));
+    }
+
+    @Test
+    public void getDigitalCardWhenDataAccessLayerExceptionThrownShouldThrowDigitalCardServiceException() {
+        String rid = "RID-EX3";
+        try {
+            when(digitalCardTransactionRepository.findByRID(rid)).thenThrow(new DataAccessLayerException("ERR_CODE","DataAccessLayer Error", null));
+        } catch (Exception e) {
+            fail("Mock setup failed: " + e.getMessage());
+        }
+
+        DigitalCardServiceException ex = assertThrows(DigitalCardServiceException.class,
+                () -> digitalCardService.getDigitalCard(rid));
+
+        assertTrue(ex.getMessage().contains(DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorMessage()));
+    }
+
+    @Test
+    public void testGetPasswordWithSimpleAttributes() throws Exception {
+        ReflectionTestUtils.setField(digitalCardService, "digitalCardPassword", "name|dob");
+        ReflectionTestUtils.setField(digitalCardService, "templateLang", "en");
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name", "John");
+        jsonObject.put("dob", "1990-01-01");
+
+        String password = ReflectionTestUtils.invokeMethod(digitalCardService, "getPassword", jsonObject);
+        assertEquals("JOHN1990", password);
+    }
+
+    @Test
+    public void testGetPasswordWithJsonArray() throws Exception {
+        ReflectionTestUtils.setField(digitalCardService, "digitalCardPassword", "name|location");
+        ReflectionTestUtils.setField(digitalCardService, "templateLang", "en");
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name", "John");
+        JSONArray locationArray = new JSONArray();
+        JSONObject location = new JSONObject();
+        location.put("language", "en");
+        location.put("value", "New York");
+        locationArray.add(location);
+        jsonObject.put("location", locationArray);
+
+        String password = ReflectionTestUtils.invokeMethod(digitalCardService, "getPassword", jsonObject);
+        assertEquals("JOHNNEW ", password);
+    }
+
+    @Test
+    public void testGetPasswordWithJsonObject() throws Exception {
+        ReflectionTestUtils.setField(digitalCardService, "digitalCardPassword", "name|address");
+        ReflectionTestUtils.setField(digitalCardService, "templateLang", "en");
+        JSONObject jsonObject = new JSONObject();
+        jsonObject.put("name", "John");
+        JSONObject addressObject = new JSONObject();
+        addressObject.put("value", "123 Main St");
+        jsonObject.put("address", addressObject);
+
+        String password = ReflectionTestUtils.invokeMethod(digitalCardService, "getPassword", jsonObject);
+        assertEquals("JOHN{\"VA", password);
+    }
+
+    @Test
+    public void testGetFormattedPasswordAttribute() {
+        String padded1 = ReflectionTestUtils.invokeMethod(digitalCardService, "getFormattedPasswordAttribute", "abc");
+        assertEquals("abca", padded1);
+
+        String padded2 = ReflectionTestUtils.invokeMethod(digitalCardService, "getFormattedPasswordAttribute", "ab");
+        assertEquals("abab", padded2);
+
+        String padded3 = ReflectionTestUtils.invokeMethod(digitalCardService, "getFormattedPasswordAttribute", "a");
+        assertEquals("aaaa", padded3);
+
+        String padded4 = ReflectionTestUtils.invokeMethod(digitalCardService, "getFormattedPasswordAttribute", "abcd");
+        assertEquals("abcd", padded4);
+    }
+
+    private String getMockDecryptedCredential() throws Exception {
+        JSONObject credentialSubject = new JSONObject();
+        credentialSubject.put("id", "12345/credentials/67890");
+
+        JSONObject credential = new JSONObject();
+        credential.put("credentialSubject", credentialSubject);
+        return credential.toString();
+    }
+
+    @Test
+    public void testGenerateDigitalCardPDFGeneratorException() throws Exception {
+        when(encryptionUtil.decryptData(anyString())).thenReturn(getMockDecryptedCredential());
+        when(pdfCardServiceImpl.generateCard(any(), anyString(), any(), any()))
+                .thenThrow(new PDFGeneratorException("PDF_ERROR", "PDF generation failed"));
+
+        digitalCardService.generateDigitalCard("credential", "type", null, "event1", "txn1", new HashMap<>());
+
+        verify(digitalCardTransactionRepository, times(1)).updateErrorTransactionDetails(anyString(), eq("ERROR"), anyString(), any(), any());
+    }
+
+    @Test
+    public void testGenerateDigitalCardGenericExceptionVCVerificationFailed() throws Exception {
+        ReflectionTestUtils.setField(digitalCardService, "verifyCredentialsFlag", true);
+        when(encryptionUtil.decryptData(anyString())).thenReturn(getMockDecryptedCredential());
+        when(credentialsVerifier.verifyCredentials(anyString())).thenReturn(false);
+
+        assertThrows(DigitalCardServiceException.class, () -> {
+            digitalCardService.generateDigitalCard("credential", "type", null, "event1", "txn1", new HashMap<>());
+        });
     }
 
 }
