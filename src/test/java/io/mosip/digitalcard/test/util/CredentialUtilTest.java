@@ -74,7 +74,7 @@ public class CredentialUtilTest {
 
     }
     @Test
-    public void getStatusTestSuccess() {
+    public void getStatusTestSuccess() throws Exception {
         List<String> pathSegments = new ArrayList<>();
         pathSegments.add(requestId);
 
@@ -82,9 +82,14 @@ public class CredentialUtilTest {
         CredentialStatusResponse expectedResponse = new CredentialStatusResponse();
         responseWrapper.setResponse(expectedResponse);
 
-        assertThrows(DigitalCardServiceException.class, () -> {
-            credentialUtil.getStatus(requestId);
-        });
+        when(restClient.getApi(eq(ApiName.CREDENTIAL_STATUS_URL), eq(pathSegments), any(), any(), eq(ResponseWrapper.class)))
+                .thenReturn(responseWrapper);
+        when(utility.writeValueAsString(expectedResponse)).thenReturn("mockedStatus");
+        when(utility.readValue("mockedStatus", CredentialStatusResponse.class)).thenReturn(expectedResponse);
+
+        CredentialStatusResponse actualResponse = credentialUtil.getStatus(requestId);
+
+        assertEquals(expectedResponse, actualResponse);
     }
 
     @Test
@@ -133,6 +138,17 @@ public class CredentialUtilTest {
         DigitalCardServiceException exception = assertThrows(DigitalCardServiceException.class, () -> credentialUtil.reqCredential(requestDto));
         assertTrue(exception.getCause() instanceof IOException);
         assertEquals("IO Error", exception.getCause().getMessage());
+    }
+
+    @Test
+    public void testGetStatusWhenRestClientThrowsShouldWrapException() throws Exception {
+        when(restClient.getApi(eq(ApiName.CREDENTIAL_STATUS_URL), any(), any(), any(), eq(ResponseWrapper.class)))
+                .thenThrow(new RuntimeException("status failed"));
+
+        DigitalCardServiceException exception = assertThrows(DigitalCardServiceException.class,
+                () -> credentialUtil.getStatus(requestId));
+
+        assertEquals("status failed", exception.getCause().getMessage());
     }
 
 }
