@@ -19,15 +19,18 @@ import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.core.env.Environment;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.HttpServerErrorException;
 
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThrows;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -58,6 +61,7 @@ public class EncryptionUtilTest {
         MockitoAnnotations.openMocks(this);
         when(env.getProperty("crypto.PrependThumbprint.enable", Boolean.class)).thenReturn(true);
         when(env.getProperty(DATETIME_PATTERN_KEY)).thenReturn(DATETIME_PATTERN);
+        ReflectionTestUtils.setField(encryptionUtil, "partnerId", "partner");
     }
 
     @Test
@@ -113,6 +117,29 @@ public class EncryptionUtilTest {
     public void shouldThrowOnInvalidDatetimePattern() {
         when(env.getProperty(DATETIME_PATTERN_KEY)).thenReturn("invalid");
         assertThrows(DataEncryptionFailureException.class, () -> encryptionUtil.decryptData("ciphertext"));
+    }
+
+    @Test
+    public void shouldThrowDataEncryptionFailureWhenMapperReadFails() throws Exception {
+        ReflectionTestUtils.setField(encryptionUtil, "mapper", new ObjectMapper());
+        when(restClient.postApi(eq(ApiName.CRYPTOMANAGER_DECRYPT), any(), any(), any(), eq(MediaType.APPLICATION_JSON), any(), eq(String.class)))
+                .thenReturn("ignored-raw-json");
+
+        DataEncryptionFailureException exception = assertThrows(DataEncryptionFailureException.class,
+                () -> encryptionUtil.decryptData("ciphertext"));
+
+        assertTrue(exception.getMessage().contains("Exception while reading packet inputStream"));
+    }
+
+    @Test
+    public void shouldThrowDataEncryptionFailureWhenUnexpectedExceptionHasNoHttpCause() throws Exception {
+        when(restClient.postApi(any(), any(), any(), any(), any(), any(), any()))
+                .thenThrow(new RuntimeException("plain failure"));
+
+        DataEncryptionFailureException exception = assertThrows(DataEncryptionFailureException.class,
+                () -> encryptionUtil.decryptData("ciphertext"));
+
+        assertTrue(exception.getMessage().contains("plain failure"));
     }
 
 }

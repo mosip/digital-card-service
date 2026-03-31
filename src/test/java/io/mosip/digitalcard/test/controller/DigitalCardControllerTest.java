@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.anyMap;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Mockito.verify;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 
@@ -122,6 +123,28 @@ public class DigitalCardControllerTest {
         lenient().doThrow(new RuntimeException("Mock Exception")).when(digitalCardService).initiateCredentialRequest(anyString(), anyString());
         ResponseEntity<?> responseEntity = digitalCardController.credentialEvent(eventModel);
         assertThat(responseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+    }
+
+    @Test
+    public void credentialEventShouldPassNullCredentialAndStripSensitiveFields() {
+        EventModel eventModel = getEventModel();
+        eventModel.getEvent().getData().put("credentialType", "type1");
+        eventModel.getEvent().getData().put("protectionKey", "secret");
+        eventModel.getEvent().getData().put("proof", "proofValue");
+
+        ResponseEntity<?> response = digitalCardController.credentialEvent(eventModel);
+
+        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+        verify(digitalCardService).generateDigitalCard(
+                org.mockito.ArgumentMatchers.isNull(),
+                org.mockito.ArgumentMatchers.eq("type1"),
+                org.mockito.ArgumentMatchers.eq("dfgwyyw"),
+                org.mockito.ArgumentMatchers.eq("113534"),
+                org.mockito.ArgumentMatchers.eq("edfvgghdfghjdfghj"),
+                argThat(map -> !map.containsKey("credential")
+                        && !map.containsKey("protectionKey")
+                        && !map.containsKey("proof"))
+        );
     }
 
     @Test

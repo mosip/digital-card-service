@@ -28,6 +28,7 @@ import java.util.Arrays;
 import java.util.LinkedHashMap;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.verify;
@@ -59,17 +60,32 @@ public class UtilityTest {
 
     @Test
     public void testGetIdentityMappingJsonWhenBlankShouldFetchFromService() throws Exception {
+        ReflectionTestUtils.setField(Utility.class, "regProcessorIdentityJson", "");
         when(restClient.getForObject(configServerFileStorageURL + identityJson, String.class))
                 .thenReturn(expectedJsonResponse);
         String actualJsonResponse = utility.getIdentityMappingJson(configServerFileStorageURL, identityJson);
 
         verify(restClient, times(1))
                 .getForObject(configServerFileStorageURL + identityJson, String.class);
+        assertEquals(expectedJsonResponse, actualJsonResponse);
     }
 
     @Test
     public void testGetMappingJsonObjectWhenBlank_ShouldFetchAndParseJson() throws Exception {
+        JSONObject root = new JSONObject();
+        LinkedHashMap<String, Object> identity = new LinkedHashMap<>();
+        identity.put("name", "value");
+        root.put("identity", identity);
+
+        ReflectionTestUtils.setField(Utility.class, "regProcessorIdentityJson", "");
+        ReflectionTestUtils.setField(utility, "configServerFileStorageURL", "http://config/");
+        ReflectionTestUtils.setField(utility, "identityJson", "identity.json");
+        when(restClient.getForObject("http://config/identity.json", String.class)).thenReturn("{json}");
+        when(objectMapper.readValue("{json}", JSONObject.class)).thenReturn(root);
+
         JSONObject actualJsonObject = utility.getMappingJsonObject();
+
+        assertEquals("value", actualJsonObject.get("name"));
     }
 
     @Test
@@ -80,6 +96,19 @@ public class UtilityTest {
         jsonObject.put("identity", linkedHashMap);
 
         JSONObject result = utility.getJSONObject(jsonObject, "identity");
+        assertEquals("value1", result.get("key1"));
+    }
+
+    @Test
+    public void testGetJSONObjectWhenJsonObjectIsNullShouldReturnNull() {
+        assertNull(utility.getJSONObject(null, "identity"));
+    }
+
+    @Test
+    public void testGetJSONObjectWhenKeyMissingShouldReturnNull() {
+        JSONObject jsonObject = new JSONObject();
+
+        assertNull(utility.getJSONObject(jsonObject, "missing"));
     }
 
     @Test
@@ -88,6 +117,7 @@ public class UtilityTest {
         jsonObject.put("key1", "value1");
 
         String result = utility.getJSONValue(jsonObject, "key1");
+        assertEquals("value1", result);
     }
 
     @Test
@@ -98,6 +128,7 @@ public class UtilityTest {
         when(objectMapper.writeValueAsString(obj)).thenReturn(expectedJson);
 
         String actualJson = utility.writeValueAsString(obj);
+        assertEquals(expectedJson, actualJson);
     }
 
     @Test
@@ -107,6 +138,7 @@ public class UtilityTest {
         jsonObject.put("key1", list);
 
         JSONArray jsonArray = utility.getJSONArray(jsonObject, "key1");
+        assertEquals(3, jsonArray.size());
     }
 
     @Test
@@ -115,6 +147,16 @@ public class UtilityTest {
         jsonObject.put("key3", null);
 
         JSONArray jsonArray = utility.getJSONArray(jsonObject, "key3");
+        assertNull(jsonArray);
+    }
+
+    @Test
+    public void testGetIdentityMappingJsonWhenCachedShouldNotFetchAgain() throws Exception {
+        ReflectionTestUtils.setField(Utility.class, "regProcessorIdentityJson", "cached-json");
+
+        utility.getIdentityMappingJson("http://config/", "identity.json");
+
+        verify(restClient, times(0)).getForObject("http://config/identity.json", String.class);
     }
 
     @Test
