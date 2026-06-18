@@ -168,6 +168,7 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 			}
 			if (credentialType.equalsIgnoreCase("qrcode")) {
 				boolean isQRcodeSet = setQrCode(decryptedCredentialJson.toString(), attributes,isPhotoSet);
+				logInvalidXmlAttributes(attributes); // DEBUG: pinpoint attribute carrying XML-illegal chars
 				InputStream uinArtifact = templateGenerator.getTemplate(templateTypeCode, attributes, templateLang);
 				pdfbytes = generateUinCard(uinArtifact, password);
 			} else {
@@ -184,6 +185,7 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 					logger.debug(DigitalCardServiceErrorCodes.QRCODE_NOT_SET.name());
 				}
 				// getting template and placing original valuespng
+				logInvalidXmlAttributes(attributes); // DEBUG: pinpoint attribute carrying XML-illegal chars
 				InputStream uinArtifact = templateGenerator.getTemplate(templateTypeCode, attributes, templateLang);
 				if (uinArtifact == null) {
 					logger.error(DigitalCardServiceErrorCodes.TEM_PROCESSING_FAILURE.name());
@@ -338,8 +340,17 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 		logger.debug("UinCardGeneratorImpl::generateUinCard()::entry");
 		byte[] pdfSignatured=null;
 		ByteArrayOutputStream out = null;
+		// DEBUG: buffer the merged template so the offending markup can be dumped on failure
+		byte[] mergedTemplate = null;
 		try {
-			out = (ByteArrayOutputStream) pdfGenerator.generate(in);
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			byte[] tmp = new byte[8192];
+			int read;
+			while ((read = in.read(tmp)) != -1) {
+				buffer.write(tmp, 0, read);
+			}
+			mergedTemplate = buffer.toByteArray();
+			out = (ByteArrayOutputStream) pdfGenerator.generate(new ByteArrayInputStream(mergedTemplate));
 			PDFSignatureRequestDto request = new PDFSignatureRequestDto(lowerLeftX, lowerLeftY, upperRightX,
 					upperRightY, reason, 1, password);
 			request.setApplicationId("KERNEL");
@@ -372,12 +383,130 @@ public class PDFCardServiceImpl implements CardGeneratorService {
 
 		} catch (Exception e) {
 			logger.info("ERROR[] :{}",e);
+			dumpMergedTemplateOnFailure(mergedTemplate, e); // DEBUG: show offending markup/line
 			logger.error(PDFGeneratorExceptionCodeConstant.PDF_EXCEPTION.getErrorMessage(),e.getMessage()
 					+ ExceptionUtils.getStackTrace(e));
 		}
 		logger.debug("UinCardGeneratorImpl::generateUinCard()::exit");
 
 		return pdfSignatured;
+	}
+
+	/**
+	 * DEBUG INSTRUMENTATION
+	 * XML 1.0 permits only: #x9 | #xA | #xD | [#x20-#xD7FF] | [#xE000-#xFFFD] | [#x10000-#x10FFFF].
+	 * Any other code point (the C0 control chars 0x00-0x08, 0x0B, 0x0C, 0x0E-0x1F, etc.) makes
+	 * openhtmltopdf fail with "Character reference &#xNN; is an invalid XML character"
+	 * -> KER-PDG-001 -> DCS-011, leaving the credential stuck at ISSUED.
+	 */
+	static boolean isInvalidXmlChar(int cp) {
+		if (cp == 0x9 || cp == 0xA || cp == 0xD) return false;
+		if (cp >= 0x20 && cp <= 0xD7FF) return false;
+		if (cp >= 0xE000 && cp <= 0xFFFD) return false;
+		if (cp >= 0x10000 && cp <= 0x10FFFF) return false;
+		return true;
+	}
+
+	/** Render a string with any XML-illegal chars shown as <0xNN> (capped for log size). */
+	static String markInvalid(String s) {
+		StringBuilder sb = new StringBuilder();
+		for (int i = 0; i < s.length() && sb.length() < 400; i++) {
+			int cp = s.charAt(i);
+			sb.append(isInvalidXmlChar(cp) ? String.format("<0x%02X>", cp) : String.valueOf((char) cp));
+		}
+		return sb.toString();
+	}
+
+	static boolean containsInvalidXml(String s) {
+		for (int i = 0; i < s.length(); i++) {
+			if (isInvalidXmlChar(s.charAt(i))) return true;
+		}
+		return false;
+	}
+
+	/**
+	 * Logs every attribute whose value contains XML-illegal characters, with the key,
+	 * count, the offending code points, and a marked preview. This identifies the exact
+	 * field that breaks PDF generation.
+	 */
+	private void logInvalidXmlAttributes(Map<String, Object> attributes) {
+		try {
+			boolean anyBad = false;
+			for (Map.Entry<String, Object> entry : attributes.entrySet()) {
+				Object val = entry.getValue();
+				if (!(val instanceof String)) {
+					continue;
+				}
+				String s = (String) val;
+				StringBuilder codepoints = new StringBuilder();
+				int badCount = 0;
+				for (int i = 0; i < s.length(); i++) {
+					int cp = s.charAt(i);
+					if (isInvalidXmlChar(cp)) {
+						badCount++;
+						if (codepoints.indexOf(String.format("0x%X", cp)) < 0) {
+							codepoints.append(String.format("0x%X ", cp));
+						}
+					}
+				}
+				if (badCount > 0) {
+					anyBad = true;
+					logger.error("INVALID-XML-ATTRIBUTE >> key='{}' badChars={} codepoints=[{}] preview='{}'",
+							entry.getKey(), badCount, codepoints.toString().trim(), markInvalid(s));
+				}
+			}
+			if (!anyBad) {
+				logger.info("INVALID-XML-ATTRIBUTE scan: no XML-illegal characters found in {} attributes",
+						attributes.size());
+			}
+		} catch (Exception ex) {
+			logger.warn("logInvalidXmlAttributes failed: {}", ex.getMessage());
+		}
+	}
+
+	/**
+	 * On PDF render failure, extracts the failing line number from the exception chain
+	 * (openhtmltopdf reports "lineNumber: N") and logs that line of the merged template
+	 * with XML-illegal characters marked. If no line number is present, logs every line
+	 * that contains illegal characters.
+	 */
+	private void dumpMergedTemplateOnFailure(byte[] mergedTemplate, Exception e) {
+		if (mergedTemplate == null) {
+			return;
+		}
+		try {
+			String html = new String(mergedTemplate, java.nio.charset.StandardCharsets.UTF_8);
+			String[] lines = html.split("\n", -1);
+
+			int failLine = -1;
+			Throwable t = e;
+			while (t != null) {
+				String msg = String.valueOf(t.getMessage());
+				java.util.regex.Matcher m = java.util.regex.Pattern.compile("lineNumber:\\s*(\\d+)").matcher(msg);
+				if (m.find()) {
+					failLine = Integer.parseInt(m.group(1));
+					break;
+				}
+				t = t.getCause();
+			}
+
+			if (failLine > 0 && failLine <= lines.length) {
+				int from = Math.max(0, failLine - 3);
+				int to = Math.min(lines.length, failLine + 2);
+				for (int i = from; i < to; i++) {
+					logger.error("MERGED-TEMPLATE L{}{} : {}", (i + 1),
+							(i + 1 == failLine ? " *FAIL*" : ""), markInvalid(lines[i]));
+				}
+			} else {
+				for (int i = 0; i < lines.length; i++) {
+					if (containsInvalidXml(lines[i])) {
+						logger.error("MERGED-TEMPLATE L{} (has XML-illegal chars): {}", (i + 1), markInvalid(lines[i]));
+					}
+				}
+			}
+		} catch (Exception ex) {
+			logger.warn("dumpMergedTemplateOnFailure failed: {}", ex.getMessage());
+		}
 	}
 }
 	
