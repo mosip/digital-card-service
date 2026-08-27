@@ -1,12 +1,10 @@
 package io.mosip.digitalcard.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import io.mosip.digitalcard.dto.DataShareResponseDto;
 import io.mosip.digitalcard.dto.DigitalCardStatusResponseDto;
 import io.mosip.digitalcard.exception.DigitalCardServiceException;
 import io.mosip.digitalcard.service.DigitalCardService;
 import io.mosip.digitalcard.util.DigitalCardRepoLogger;
-import io.mosip.kernel.core.exception.ExceptionUtils;
 import io.mosip.kernel.core.http.ResponseWrapper;
 import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.kernel.core.util.CryptoUtil;
@@ -15,9 +13,7 @@ import io.mosip.kernel.websub.api.annotation.PreAuthenticateContentAndVerifyInte
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
-import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.core.io.InputStreamResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -25,8 +21,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayInputStream;
-import java.util.HashMap;
-import java.util.Map;
 
 @RestController
 @Api(value = "This api generate Digital Card based on RID",tags = {"Digital Card"})
@@ -34,12 +28,6 @@ public class DigitalCardController {
 
     @Autowired
     DigitalCardService digitalCardServiceImpl;
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private Environment environment;
 
     Logger logger = DigitalCardRepoLogger.getLogger(DigitalCardController.class);
 
@@ -80,19 +68,12 @@ public class DigitalCardController {
     public ResponseEntity<?> credentialEvent(@RequestBody EventModel eventModel)  {
         logger.info("event recieved from websub id: {}, topic : {}",eventModel.getEvent().getId(),eventModel.getTopic());
         try {
-            Map<String, Object> additionalAttributes= new HashMap<>();
-            additionalAttributes.putAll(eventModel.getEvent().getData());
-            additionalAttributes.remove("credential");
-            additionalAttributes.remove("protectionKey");
-            additionalAttributes.remove("proof");
-            digitalCardServiceImpl.generateDigitalCard(eventModel.getEvent().getData().containsKey("credential")?eventModel.getEvent().getData().get("credential").toString():null,
+            digitalCardServiceImpl.generateDigitalCard(eventModel.getEvent().getData().get("credential").toString(),
                     eventModel.getEvent().getData().get("credentialType").toString(),
-                    eventModel.getEvent().getDataShareUri(), eventModel.getEvent().getId(), eventModel.getEvent().getTransactionId(),additionalAttributes);
+                    eventModel.getEvent().getDataShareUri(), eventModel.getEvent().getId(), eventModel.getEvent().getTransactionId());
             logger.info("successfully gnerated the digitalcard.");
         }catch (Exception e){
-            logger.error("Db User name-"+environment.getProperty("javax.persistence.jdbc.user"));
-            logger.error("digitalcard generation failed: {}" + ExceptionUtils.getStackTrace(e));
-
+            logger.error("digitalcard generation failed.");
         }
         return new ResponseEntity<>("request accepted.", HttpStatus.OK);
     }

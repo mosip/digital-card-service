@@ -40,7 +40,7 @@ COMMENT ON COLUMN digitalcard.digitalcard_transaction.uin_salted_hash IS 'Reques
 -- ddl-end --
 COMMENT ON COLUMN digitalcard.digitalcard_transaction.status_code IS 'Status Code: Contains status of request';
 -- ddl-end --
-COMMENT ON COLUMN digitalcard.digitalcard_transaction.datashareurl IS 'Datashare URL: Credential data url';
+COMMENT ON COLUMN digitalcard.digitalcard_transaction.datashareurl IS 'Datashare URL: digitalcard data url';
 -- ddl-end --
 COMMENT ON COLUMN digitalcard.digitalcard_transaction.issuancedate IS 'Issuance Date: Credential issue date';
 -- ddl-end --

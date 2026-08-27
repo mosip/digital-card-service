@@ -17,7 +17,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
-import jakarta.annotation.PostConstruct;
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
@@ -36,7 +36,6 @@ public class Utility {
     @Value("${mosip.kernel.config.server.file.storage.uri}")
     private String configServerFileStorageURL;
 
-
     private static final String LANGUAGE = "language";
 
     @Autowired
@@ -53,7 +52,6 @@ public class Utility {
 
     private static String regProcessorIdentityJson = "";
 
-
     /** The get reg processor identity json. */
     @Value("${mosip.digitalcard.identityjson}")
     private String identityJson;
@@ -63,8 +61,6 @@ public class Utility {
     private String demographicIdentity;
 
     private String mappingJsonString = null;
-
-    private String uinCardTemplateData = null;
 
 
     @PostConstruct
@@ -87,7 +83,6 @@ public class Utility {
 
         return getJSONObject(objectMapper.readValue(regProcessorIdentityJson,JSONObject.class),IDENTITY);
     }
-
 
     @SuppressWarnings("unchecked")
     public JSONObject getJSONObject(JSONObject jsonObject, Object key)  {

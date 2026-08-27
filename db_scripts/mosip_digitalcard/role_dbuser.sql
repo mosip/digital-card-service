@@ -1,4 +1,4 @@
-CREATE ROLE :dbuname WITH
+CREATE ROLE digitalcarduser WITH 
 	INHERIT
 	LOGIN
 	PASSWORD :dbuserpwd;

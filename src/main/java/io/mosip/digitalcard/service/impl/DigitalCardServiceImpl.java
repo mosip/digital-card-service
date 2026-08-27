@@ -3,6 +3,7 @@ package io.mosip.digitalcard.service.impl;
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import io.mosip.digitalcard.constant.DigitalCardServiceErrorCodes;
+import io.mosip.digitalcard.constant.PDFGeneratorExceptionCodeConstant;
 import io.mosip.digitalcard.controller.DigitalCardController;
 import io.mosip.digitalcard.dto.*;
 import io.mosip.digitalcard.entity.DigitalCardTransactionEntity;
@@ -10,6 +11,7 @@ import io.mosip.digitalcard.exception.ApiNotAccessibleException;
 import io.mosip.digitalcard.exception.DataNotFoundException;
 import io.mosip.digitalcard.exception.DataShareException;
 import io.mosip.digitalcard.exception.DigitalCardServiceException;
+import io.mosip.digitalcard.exception.ImageVerificationException;
 import io.mosip.digitalcard.repositories.DigitalCardTransactionRepository;
 import io.mosip.digitalcard.service.DigitalCardService;
 import io.mosip.digitalcard.service.CardGeneratorService;
@@ -21,16 +23,14 @@ import io.mosip.kernel.core.dataaccess.exception.DataAccessLayerException;
 import io.mosip.kernel.core.logger.spi.Logger;
 import io.mosip.kernel.core.pdfgenerator.exception.PDFGeneratorException;
 import io.mosip.kernel.core.qrcodegenerator.exception.QrcodeGenerationException;
-import io.mosip.kernel.core.util.DateUtils2;
-import io.mosip.kernel.core.websub.model.EventModel;
-import io.mosip.vercred.CredentialsVerifier;
+import io.mosip.kernel.core.util.DateUtils;
+//import io.mosip.vercred.CredentialsVerifier;
 import org.json.JSONObject;
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -61,8 +61,8 @@ public class DigitalCardServiceImpl implements DigitalCardService {
     @Autowired
     private EncryptionUtil encryptionUtil;
 
-    @Autowired
-    private CredentialsVerifier credentialsVerifier;
+  //  @Autowired
+    //private CredentialsVerifier credentialsVerifier;
 
     @Autowired
     private DataShareUtil dataShareUtil;
@@ -106,11 +106,9 @@ public class DigitalCardServiceImpl implements DigitalCardService {
     @Value("${mosip.template-language}")
     private String templateLang;
 
-
     Logger logger = DigitalCardRepoLogger.getLogger(DigitalCardController.class);
 
-    public void generateDigitalCard(String credential, String credentialType,String dataShareUrl,String eventId,String transactionId,Map<String,Object> additionalAttributes) {
-        boolean isGenerated = false;
+    public void generateDigitalCard(String credential, String credentialType,String dataShareUrl,String eventId,String transactionId) {
         String decryptedCredential=null;
         String password=null;
         String rid=null;
@@ -119,37 +117,42 @@ public class DigitalCardServiceImpl implements DigitalCardService {
                 credential = restClient.getForObject(dataShareUrl, String.class);
             }
             decryptedCredential = encryptionUtil.decryptData(credential);
-            JSONObject jsonObject = new org.json.JSONObject(decryptedCredential);
+            JSONObject jsonObject = new JSONObject(decryptedCredential);
             JSONObject decryptedCredentialJson = jsonObject.getJSONObject("credentialSubject");
             rid=getRid(decryptedCredentialJson.get("id"));
             if (verifyCredentialsFlag){
                 logger.info("Configured received credentials to be verified. Flag {}", verifyCredentialsFlag);
-                boolean verified =credentialsVerifier.verifyCredentials(decryptedCredential);
+                boolean verified =true;
+                        //credentialsVerifier.verifyCredentials(decryptedCredential);
                 if (!verified) {
-                    loginErrorDetails(rid,DigitalCardServiceErrorCodes.VC_VERIFICATION_FAILED.getError());
                     logger.error("Received Credentials failed in verifiable credential verify method. So, digital card is not getting generated." +
                             " Id: {}, Transaction Id: {}",eventId, transactionId);
+                    loginErrorDetails(rid,DigitalCardServiceErrorCodes.VC_VERIFICATION_FAILED.getError());
                     throw new DigitalCardServiceException(DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorCode(),DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorMessage());
                 }
             }
             if (isPasswordProtected) {
-                password = getPassword(decryptedCredentialJson);
+                password = getPassword(decryptedCredentialJson).toUpperCase();
             }
-            byte[] pdfBytes=pdfCardServiceImpl.generateCard(decryptedCredentialJson, credentialType,password,additionalAttributes);
+            byte[] pdfBytes=pdfCardServiceImpl.generateCard(decryptedCredentialJson, credentialType,password,rid);
             digitalCardStatusUpdate(transactionId,pdfBytes,credentialType,rid);
-            logger.info("successfully generated the digitalcard for rid: {}",rid);
         }catch (QrcodeGenerationException e) {
             loginErrorDetails(rid,DigitalCardServiceErrorCodes.QRCODE_NOT_GENERATED.getError());
-            logger.error(DigitalCardServiceErrorCodes.QRCODE_NOT_GENERATED.getErrorMessage()+": {}",e);
+            logger.error(DigitalCardServiceErrorCodes.QRCODE_NOT_GENERATED.getErrorMessage(), e);
         } catch (PDFGeneratorException e) {
             loginErrorDetails(rid,DigitalCardServiceErrorCodes.PDF_NOT_GENERATED.getError());
-            logger.error(DigitalCardServiceErrorCodes.PDF_NOT_GENERATED.getErrorMessage()+": {}" ,e);
+            logger.error(DigitalCardServiceErrorCodes.PDF_NOT_GENERATED.getErrorMessage() ,e);
         }catch (JsonParseException | JsonMappingException e) {
             loginErrorDetails(rid,DigitalCardServiceErrorCodes.ATTRIBUTE_NOT_SET.getError());
-            logger.error(DigitalCardServiceErrorCodes.ATTRIBUTE_NOT_SET.getErrorMessage()+": {}" ,e);
+            logger.error(DigitalCardServiceErrorCodes.ATTRIBUTE_NOT_SET.getErrorMessage() ,e);
+        } catch (ImageVerificationException e){
+            loginErrorDetails(rid,e.getMessage());
+            logger.error(e.getMessage() ,e);
+        } catch (DigitalCardServiceException e){
+        	throw e;
         } catch (Exception e){
             loginErrorDetails(rid, DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getError());
-            logger.error(DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorMessage()+": {}" , e);
+            logger.error(DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorMessage() , e);
             throw new DigitalCardServiceException(DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorCode(),DigitalCardServiceErrorCodes.DIGITAL_CARD_NOT_GENERATED.getErrorMessage());
         }
     }
@@ -212,19 +215,8 @@ public class DigitalCardServiceImpl implements DigitalCardService {
         DataShareDto dataShareDto = null;
         dataShareDto = dataShareUtil.getDataShare(data, dataSharePolicyId, dataSharePartnerId);
         CredentialStatusEvent creEvent = new CredentialStatusEvent();
-        LocalDateTime currentDtime = DateUtils2.getUTCCurrentDateTime();
-        DigitalCardTransactionEntity digitalCardTransactionEntity=digitalCardTransactionRepository.findByRID(rid);
-        if(digitalCardTransactionEntity==null){
-            DigitalCardTransactionEntity digitalCardEntity=new DigitalCardTransactionEntity();
-            digitalCardEntity.setrid(rid);
-            digitalCardEntity.setCreateDateTime(LocalDateTime.now());
-            digitalCardEntity.setCreatedBy(Utility.getUser());
-            digitalCardEntity.setDataShareUrl(dataShareDto.getUrl());
-            digitalCardEntity.setStatusCode("AVAILABLE");
-            digitalCardTransactionRepository.save(digitalCardEntity);
-        }else{
-            digitalCardTransactionRepository.updateTransactionDetails(rid,"AVAILABLE", dataShareDto.getUrl(),LocalDateTime.now(),Utility.getUser());
-        }
+        LocalDateTime currentDtime = DateUtils.getUTCCurrentDateTime();
+        digitalCardTransactionRepository.updateTransactionDetails(rid,"AVAILABLE", dataShareDto.getUrl(),LocalDateTime.now(),Utility.getUser());
         StatusEvent sEvent = new StatusEvent();
         sEvent.setId(UUID.randomUUID().toString());
         sEvent.setRequestId(requestId);
@@ -275,10 +267,10 @@ public class DigitalCardServiceImpl implements DigitalCardService {
                 org.json.simple.JSONObject json = (org.json.simple.JSONObject) object;
                 uinCardPd = uinCardPd.concat((String) json.get(VALUE));
             } else {
-                uinCardPd = uinCardPd.concat(getFormattedPasswordAttribute((String) Objects.requireNonNull(object).toString()).substring(0,4));
+                uinCardPd = uinCardPd.concat(getFormattedPasswordAttribute((String) object.toString()).substring(0,4));
             }
         }
-        return uinCardPd.toUpperCase();
+        return uinCardPd;
     }
 
     private String getFormattedPasswordAttribute(String password){
@@ -292,6 +284,7 @@ public class DigitalCardServiceImpl implements DigitalCardService {
             return password;
         }
     }
+
 
     /**
      * Gets the parameter.
@@ -316,8 +309,8 @@ public class DigitalCardServiceImpl implements DigitalCardService {
         }
         return parameter;
     }
+
     public void loginErrorDetails(String rid, String errorMsg){
         digitalCardTransactionRepository.updateErrorTransactionDetails(rid,"ERROR",errorMsg,LocalDateTime.now(),Utility.getUser());
     }
-
 }

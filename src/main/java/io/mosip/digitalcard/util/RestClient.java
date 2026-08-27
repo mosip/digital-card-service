@@ -1,8 +1,26 @@
 package io.mosip.digitalcard.util;
 
+import com.google.gson.Gson;
 import io.mosip.digitalcard.constant.ApiName;
+import io.mosip.digitalcard.dto.Metadata;
+import io.mosip.digitalcard.dto.SecretKeyRequest;
+import io.mosip.digitalcard.dto.TokenRequestDTO;
 import io.mosip.digitalcard.exception.ApisResourceAccessException;
 import io.mosip.kernel.core.logger.spi.Logger;
+import io.mosip.kernel.core.util.DateUtils;
+import io.mosip.kernel.core.util.StringUtils;
+import io.mosip.kernel.core.util.TokenHandlerUtil;
+import org.apache.http.Header;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.HttpClient;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.conn.ssl.SSLConnectionSocketFactory;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.ssl.TrustStrategy;
+import org.apache.http.util.EntityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
@@ -10,6 +28,7 @@ import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.http.client.HttpComponentsClientHttpRequestFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -17,7 +36,12 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponents;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import javax.net.ssl.SSLContext;
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.KeyStoreException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.X509Certificate;
 import java.util.Iterator;
 import java.util.List;
 
@@ -157,16 +181,16 @@ public class RestClient {
      */
     @SuppressWarnings("unchecked")
     public <T> T getForObject(String url,
-                        Class<?> responseType) throws Exception {
+                              Class<?> responseType) throws Exception {
 
-            T result = null;
-            try {
-                logger.info("RestApiClient::getApi()::entry uri : {}",url);
-                result = (T) restTemplate
-                        .getForObject(url, responseType);
-            } catch (Exception e) {
-                throw new Exception(e);
-            }
+        T result = null;
+        try {
+            logger.info("RestApiClient::getApi()::entry uri : {}",url);
+            result = (T) restTemplate
+                    .getForObject(url, responseType);
+        } catch (Exception e) {
+            throw new Exception(e);
+        }
         return result;
     }
 

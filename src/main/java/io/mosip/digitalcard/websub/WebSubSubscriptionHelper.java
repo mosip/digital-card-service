@@ -35,6 +35,10 @@ public class WebSubSubscriptionHelper {
 	private PublisherClient<String, CredentialStatusEvent, HttpHeaders> pb;
 
 
+	@Autowired
+	RestTemplate restTemplate;
+
+
 	private static final String WEBSUBSUBSCRIPTIONHEPLER = "WebSubSubscriptionHelper";
 
 	private static final String INITSUBSCRIPTION = "initSubsriptions";
@@ -56,6 +60,7 @@ public class WebSubSubscriptionHelper {
 			subscriptionRequest.setTopic(topic);
 			sb.subscribe(subscriptionRequest);
 		} catch (WebSubClientException e) {
+			e.printStackTrace();
 			LOGGER.info(Utility.getUser(), WEBSUBSUBSCRIPTIONHEPLER, INITSUBSCRIPTION,
 					"websub subscription error");
 		}
@@ -66,6 +71,7 @@ public class WebSubSubscriptionHelper {
 			pb.publishUpdate(topic, credentialStatusEvent, MediaType.APPLICATION_JSON_UTF8_VALUE, headers,
 					webSubHubUrl);
 		} catch (WebSubClientException e) {
+			e.printStackTrace();
 			LOGGER.info("websub publish update error {} {}", WEBSUBSUBSCRIPTIONHEPLER, INITSUBSCRIPTION);
 		}
 	}

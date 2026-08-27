@@ -6,53 +6,57 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>3.2.3</version>
+		<version>2.0.2.RELEASE</version>
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>io.mosip.digitalcard</groupId>
 	<artifactId>digital-card-service</artifactId>
-	<version>1.4.0-SNAPSHOT</version>
+	<version>1.1.5.6</version>
 	<name>digital-card-service</name>
-	<description>Mosip digital-card-service project </description>
-	<url>https://github.com/mosip/digital-card-service.git</url>
+	<url>https://github.com/mosip/digital-card-service</url>
+	<description>Digital Card Service for MOSIP</description>
+
 	<properties>
-		<maven.compiler.source>21</maven.compiler.source>
-		<maven.compiler.target>21</maven.compiler.target>
-		<mosip.biometric.util.version>1.3.1</mosip.biometric.util.version>
-		<kernel.core.version>1.3.1-rc.1</kernel.core.version>
+		<maven.compiler.source>11</maven.compiler.source>
+		<maven.compiler.target>11</maven.compiler.target>
+		<kernel.core.version>1.2.0.1</kernel.core.version>
+		<spring.boot.version>2.0.2.RELEASE</spring.boot.version>
+		<spring.data.jpa.version>2.0.7.RELEASE</spring.data.jpa.version>
 		<spring.security.test.version>5.0.5.RELEASE</spring.security.test.version>
+		<spring-cloud-config.version>2.0.4.RELEASE</spring-cloud-config.version>
 		<springfox.version>2.9.2</springfox.version>
-		<kernel.websub.version>1.3.1-rc.1</kernel.websub.version>
-		<kernel.pdf.generator.version>1.3.1-rc.1</kernel.pdf.generator.version>
+		<kernel.websub.version>1.2.0.1</kernel.websub.version>
 		<gson.version>2.8.4</gson.version>
-		<maven.javadoc.version>3.2.0</maven.javadoc.version>
-		<jacoco.maven.plugin.version>0.8.11</jacoco.maven.plugin.version>
-		<sonar.maven.plugin.version>3.7.0.1746</sonar.maven.plugin.version>
-		<maven.surefire.plugin.version>2.22.0</maven.surefire.plugin.version>
-		<springdoc.openapi.starter.webmvc.ui.version>2.5.0</springdoc.openapi.starter.webmvc.ui.version>
-		<maven.deploy.plugin.version>3.1.1</maven.deploy.plugin.version>
-		<central.publishing.maven.plugin.version>0.7.0</central.publishing.maven.plugin.version>
 	</properties>
-	<repositories>
-		<repository>
-			<id>ossrh-central</id>
-			<name>MavenCentralRepository</name>
-			<url>https://central.sonatype.com/repository/maven-snapshots</url>
-			<layout>default</layout>
-			<snapshots>
-				<enabled>true</enabled>
-			</snapshots>
-		</repository>
-		<repository>
-			<id>central</id>
-			<name>MavenCentral</name>
-			<layout>default</layout>
-			<url>https://repo1.maven.org/maven2</url>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-core</artifactId>
+				<version>2.13.5</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-databind</artifactId>
+				<version>2.13.5</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.core</groupId>
+				<artifactId>jackson-annotations</artifactId>
+				<version>2.13.5</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.datatype</groupId>
+				<artifactId>jackson-datatype-jsr310</artifactId>
+				<version>2.13.5</version>
+			</dependency>
+			<dependency>
+				<groupId>com.fasterxml.jackson.dataformat</groupId>
+				<artifactId>jackson-dataformat-cbor</artifactId>
+				<version>2.13.5</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	<dependencies>
 		<dependency>
 			<groupId>io.mosip.kernel</groupId>
@@ -73,30 +77,6 @@
 				</exclusion>
 			</exclusions>
 		</dependency>
-<!--		<dependency>-->
-<!--			<groupId>io.mosip.kernel</groupId>-->
-<!--			<artifactId>kernel-auth-adapter</artifactId>-->
-<!--			<version>1.3.1</version>-->
-<!--		</dependency>-->
-		<dependency>
-			<groupId>org.junit.vintage</groupId>
-			<artifactId>junit-vintage-engine</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.junit.jupiter</groupId>
-			<artifactId>junit-jupiter-api</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.mockito</groupId>
-			<artifactId>mockito-core</artifactId>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.powermock</groupId>
-			<artifactId>powermock-api-mockito2</artifactId>
-			<scope>test</scope>
-		</dependency>
 		<dependency>
 			<groupId>io.mosip.kernel</groupId>
 			<artifactId>kernel-logger-logback</artifactId>
@@ -110,21 +90,27 @@
 		<dependency>
 			<groupId>com.googlecode.json-simple</groupId>
 			<artifactId>json-simple</artifactId>
+			<version>1.1.1</version>
 		</dependency>
 		<dependency>
 			<groupId>io.mosip.kernel</groupId>
 			<artifactId>kernel-cbeffutil-api</artifactId>
-			<version>${mosip.biometric.util.version}</version>
+			<version>1.2.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>io.mosip.biometric.util</groupId>
 			<artifactId>biometrics-util</artifactId>
-			<version>${mosip.biometric.util.version}</version>
+			<version>1.2.0.1</version>
+		</dependency>
+		<dependency>
+			<groupId>io.mosip.kernel</groupId>
+			<artifactId>kernel-biometrics-api</artifactId>
+			<version>1.2.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
-			<version>42.7.2</version>
+			<version>${postgresql.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.mosip.kernel</groupId>
@@ -132,33 +118,47 @@
 			<version>${kernel.core.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.springdoc</groupId>
-			<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-			<version>${springdoc.openapi.starter.webmvc.ui.version}</version>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>${springfox.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>${springfox.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-security</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.junit.vintage</groupId>
-					<artifactId>junit-vintage-engine</artifactId>
-				</exclusion>
-			</exclusions>
+			<version>${spring.boot.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-test</artifactId>
+			<version>${spring.security.test.version}</version>
+		</dependency>
+		<!-- JUnit 5 for face-extraction tests -->
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-api</artifactId>
+			<version>5.9.3</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.junit.jupiter</groupId>
+			<artifactId>junit-jupiter-engine</artifactId>
+			<version>5.9.3</version>
+			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>io.mosip.kernel</groupId>
 			<artifactId>kernel-websubclient-api</artifactId>
-			<version>${kernel.websub.version}</version>
+			<version>1.2.0.1</version>
 		</dependency>
 		<dependency>
 			<groupId>io.mosip.kernel</groupId>
-			<artifactId>kernel-pdfgenerator</artifactId>
-			<version>${kernel.pdf.generator.version}</version>
+			<artifactId>kernel-pdfgenerator-itext</artifactId>
+			<version>${kernel.core.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.mosip.kernel</groupId>
@@ -168,78 +168,137 @@
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
 			<artifactId>gson</artifactId>
+			<version>${gson.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
+			<version>1.18.20</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>javax.xml.bind</groupId>
 			<artifactId>jaxb-api</artifactId>
-		</dependency>
-		<dependency>
-			<groupId>org.javassist</groupId>
-			<artifactId>javassist</artifactId>
+			<version>2.3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>io.mosip.kernel</groupId>
 			<artifactId>kernel-templatemanager-velocity</artifactId>
-			<version>${kernel.core.version}</version>
+			<version>1.2.0.1</version>
 		</dependency>
-		<!--<dependency>
+		<dependency>
 			<groupId>info.weboftrust</groupId>
 			<artifactId>ld-signatures-java</artifactId>
 			<version>1.0.0</version>
-		</dependency>-->
-		<dependency>
+		</dependency>
+<!--		<dependency>
 			<groupId>io.mosip.vercred</groupId>
 			<artifactId>vcverifier</artifactId>
-			<version>1.0.0</version>
-		</dependency>
+			<version>1.1.0</version>
+		</dependency>-->
 		<dependency>
 			<groupId>org.springframework.cloud</groupId>
 			<artifactId>spring-cloud-starter-config</artifactId>
+			<version>${spring-cloud-config.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>javax.activation</groupId>
-			<artifactId>activation</artifactId>
+			<groupId>org.openpnp</groupId>
+			<artifactId>opencv</artifactId>
+			<version>4.6.0-0</version>
 		</dependency>
 		<dependency>
-			<groupId>org.glassfish.jaxb</groupId>
-			<artifactId>jaxb-runtime</artifactId>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk15on</artifactId>
+			<version>1.70</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.dataformat</groupId>
+			<artifactId>jackson-dataformat-cbor</artifactId>
+			<version>2.13.5</version>
+		</dependency>
+		<dependency>
+			<groupId>com.augustcellars.cose</groupId>
+			<artifactId>cose-java</artifactId>
+			<version>1.1.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/cose-java-1.1.0.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>io.mosip</groupId>
+			<artifactId>extractor-mtcnn-face</artifactId>
+			<version>1.1.6.0</version>
+			<scope>system</scope>
+			<systemPath>${project.basedir}/lib/extractor-mtcnn-face-1.1.6.0.jar</systemPath>
+		</dependency>
+		<dependency>
+			<groupId>io.github.ehn-digital-green-development</groupId>
+			<artifactId>base45</artifactId>
+			<version>0.0.3</version>
+		</dependency>
+		<dependency>
+			<groupId>com.upokecenter</groupId>
+			<artifactId>cbor</artifactId>
+			<version>4.5.2</version>
+		</dependency>
+		<dependency>
+			<groupId>net.i2p.crypto</groupId>
+			<artifactId>eddsa</artifactId>
+			<version>0.3.0</version>
+		</dependency>
+		<dependency>
+			<groupId>io.mosip.kernel</groupId>
+			<artifactId>kernel-auth-adapter</artifactId>
+			<version>1.2.0.2</version>
 		</dependency>
 	</dependencies>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>io.mosip.kernel</groupId>
-				<artifactId>kernel-bom</artifactId>
-				<version>${kernel.core.version}</version>
-				<type>pom</type>
-				<scope>import</scope>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 	<distributionManagement>
 		<snapshotRepository>
 			<id>ossrh</id>
-			<url>https://central.sonatype.com/repository/maven-snapshots/</url>
+			<url>https://oss.sonatype.org/content/repositories/snapshots</url>
 		</snapshotRepository>
 		<repository>
 			<id>ossrh</id>
-			<url>https://central.sonatype.com/api/v1/publisher</url>
+			<url>https://oss.sonatype.org/service/local/staging/deploy/maven2/</url>
 		</repository>
+
 	</distributionManagement>
+	<repositories>
+		<repository>
+			<id>mosip-nexus</id>
+			<name>MOSIP Public Nexus</name>
+			<url>https://nexus.mosip.net/repository/maven-releases/</url>
+		</repository>
+		<repository>
+			<id>mosip-nexus-snapshots</id>
+			<name>MOSIP Public Nexus Snapshots</name>
+			<url>https://nexus.mosip.net/repository/maven-snapshots/</url>
+			<snapshots><enabled>true</enabled></snapshots>
+		</repository>
+		<repository>
+			<id>danubetech-maven-public</id>
+			<name>Danubetech Maven Public</name>
+			<url>https://repo.danubetech.com/repository/maven-public/</url>
+		</repository>
+	</repositories>
 	<build>
 		<plugins>
+			<!-- JUnit 5 support for Maven Surefire -->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>2.22.2</version>
+				<configuration>
+					<useSystemClassLoader>false</useSystemClassLoader>
+				</configuration>
+			</plugin>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
-				<version>3.2.3</version>
+				<version>${spring.boot.version}</version>
 				<configuration>
 					<executable>true</executable>
 					<layout>ZIP</layout>
+					<includeSystemScope>true</includeSystemScope>
 				</configuration>
 				<executions>
 					<execution>
@@ -247,41 +306,43 @@
 							<goal>build-info</goal>
 							<goal>repackage</goal>
 						</goals>
-						<configuration>
-							<attach>false</attach>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
 			<plugin>
 				<artifactId>maven-deploy-plugin</artifactId>
-				<version>${maven.deploy.plugin.version}</version>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
+				<version>2.8.1</version>
 				<executions>
 					<execution>
 						<id>default-deploy</id>
-						<phase>none</phase>
+						<phase>deploy</phase>
 						<goals>
 							<goal>deploy</goal>
 						</goals>
-						<configuration>
-							<skip>true</skip>
-						</configuration>
 					</execution>
 				</executions>
 			</plugin>
 			<plugin>
-				<groupId>org.sonatype.central</groupId>
-				<artifactId>central-publishing-maven-plugin</artifactId>
-				<version>${central.publishing.maven.plugin.version}</version>
+				<groupId>org.sonatype.plugins</groupId>
+				<artifactId>nexus-staging-maven-plugin</artifactId>
+				<version>1.6.7</version>
 				<extensions>true</extensions>
+				<executions>
+					<execution>
+						<id>default-deploy</id>
+						<phase>deploy</phase>
+						<goals>
+							<goal>deploy</goal>
+						</goals>
+					</execution>
+				</executions>
 				<configuration>
-					<publishingServerId>ossrh</publishingServerId>
-					<autoPublish>false</autoPublish>
+					<serverId>ossrh</serverId>
+					<nexusUrl>https://oss.sonatype.org/</nexusUrl>
+					<autoReleaseAfterClose>false</autoReleaseAfterClose>
 				</configuration>
 			</plugin>
+
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-source-plugin</artifactId>
@@ -300,7 +361,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
-				<version>${maven.javadoc.version}</version>
+				<version>3.2.0</version>
 				<executions>
 					<execution>
 						<id>attach-javadocs</id>
@@ -316,7 +377,7 @@
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-gpg-plugin</artifactId>
-				<version>3.2.0</version>
+				<version>1.5</version>
 				<executions>
 					<execution>
 						<id>sign-artifacts</id>
@@ -330,42 +391,6 @@
 								<arg>loopback</arg>
 							</gpgArguments>
 						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-surefire-plugin</artifactId>
-				<version>${maven.surefire.plugin.version}</version>
-				<configuration>
-					<skipTests>false</skipTests>
-					<skip>false</skip>
-					<argLine>
-						${argLine}
-						--add-opens java.xml/jdk.xml.internal=ALL-UNNAMED
-						--add-opens java.base/java.lang=ALL-UNNAMED
-						--add-modules=ALL-SYSTEM
-						--illegal-access=debug
-						--enable-preview
-					</argLine>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.jacoco</groupId>
-				<artifactId>jacoco-maven-plugin</artifactId>
-				<version>${jacoco.maven.plugin.version}</version>
-				<executions>
-					<execution>
-						<goals>
-							<goal>prepare-agent</goal>
-						</goals>
-					</execution>
-					<execution>
-						<id>report</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>report</goal>
-						</goals>
 					</execution>
 				</executions>
 			</plugin>
@@ -384,7 +409,7 @@
 				</executions>
 				<configuration>
 					<generateGitPropertiesFile>true</generateGitPropertiesFile>
-					<generateGitPropertiesFilename>${project.build.outputDirectory}/service-git.properties</generateGitPropertiesFilename>
+					<generateGitPropertiesFilename>${project.build.outputDirectory}/git.properties</generateGitPropertiesFilename>
 					<includeOnlyProperties>
 						<includeOnlyProperty>^git.build.(time|version)$</includeOnlyProperty>
 						<includeOnlyProperty>^git.commit.id.(abbrev|full)$</includeOnlyProperty>
@@ -394,26 +419,6 @@
 					<!-- <format>json</format> -->
 				</configuration>
 			</plugin>
-			<plugin>
-				<groupId>org.springdoc</groupId>
-				<artifactId>springdoc-openapi-maven-plugin</artifactId>
-				<version>1.3</version>
-				<executions>
-					<execution>
-						<id>integration-test</id>
-						<goals>
-							<goal>generate</goal>
-						</goals>
-					</execution>
-				</executions>
-				<configuration>
-					<apiDocsUrl>http://localhost:8090/app/generic/v3/api-docs/digitalcard%20Service</apiDocsUrl>
-					<outputFileName>${artifactId}-openapi.json</outputFileName>
-					<outputDir>${project.build.directory}</outputDir>
-					<skip>false</skip>
-				</configuration>
-			</plugin>
-
 		</plugins>
 	</build>
 	<scm>
@@ -436,39 +441,4 @@
 			<organizationUrl>https://github.com/mosip/commons</organizationUrl>
 		</developer>
 	</developers>
-	    <profiles>
-        <profile>
-            <id>sonar</id>
-            <properties>
-                <sonar.sources>.</sonar.sources>
-                <sonar.inclusions>src/main/java/**/*.java</sonar.inclusions>
-				<sonar.test.inclusions>src/test/java/**/*Test.java</sonar.test.inclusions>
-				<sonar.coverage.exclusions>**/constant/**,**/config/**,**/httpfilter/**,**/cache/**,**/dto/**,**/entity/**</sonar.coverage.exclusions>
-                <sonar.exclusions>
-					**/constant/**,**/config/**,**/httpfilter/**,**/cache/**,**/dto/**,**/entity/**,**/model/**,**/exception/**,**/repository/**,**/security/**,**/*Config.java,**/*BootApplication.java,**/*VertxApplication.java,**/cbeffutil/**,**/mock/**,**/OrderCard*,**/testrig/**
-				</sonar.exclusions>
-                <sonar.host.url>https://sonarcloud.io</sonar.host.url>
-            </properties>
-            <activation>
-                <activeByDefault>false</activeByDefault>
-            </activation>
-            <build>
-                <plugins>
-                    <plugin>
-                        <groupId>org.sonarsource.scanner.maven</groupId>
-                        <artifactId>sonar-maven-plugin</artifactId>
-                        <version>${sonar.maven.plugin.version}</version>
-                        <executions>
-                            <execution>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sonar</goal>
-                                </goals>
-                            </execution>
-                        </executions>
-                    </plugin>
-                </plugins>
-            </build>
-        </profile>
-    </profiles>
 </project>
